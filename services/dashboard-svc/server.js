@@ -3,13 +3,14 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+const uiPath = path.resolve(__dirname, '..', '..', 'code.html');
 
-// Serve static files from current directory
-app.use(express.static(path.join(__dirname)));
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
 
-// Serve index.html for all routes (SPA behavior)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(uiPath);
 });
 
 app.listen(PORT, () => {
