@@ -1,19 +1,19 @@
-import asyncpg
 import os
-from typing import Optional
+from typing import Optional, Any
 
-_pool: Optional[asyncpg.Pool] = None
+_pool: Optional[Any] = None
 
-async def get_db_pool() -> asyncpg.Pool:
+
+async def get_db_pool():
     """Get or create database connection pool."""
     global _pool
     if _pool is None:
-        database_url = os.getenv(
-            "POSTGRES_URL",
-            "postgresql://scannr:scannr@postgres:5432/scannr"
-        )
+        import asyncpg
+
+        database_url = os.getenv("POSTGRES_URL", "postgresql://scannr:scannr@postgres:5432/scannr")
         _pool = await asyncpg.create_pool(database_url)
     return _pool
+
 
 async def close_db_pool():
     """Close database connection pool."""

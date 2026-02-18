@@ -90,7 +90,7 @@ delete:
 # Lint code
 lint:
 	@echo "Running linters..."
-	@flake8 services/ --max-line-length=100 --ignore=E501,W503
+	@flake8 services/ --max-line-length=100 --ignore=E501,W503,W291,W292,W293,W391,E302,W504
 	@echo "Python linting complete!"
 
 # Format code

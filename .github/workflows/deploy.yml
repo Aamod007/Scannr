@@ -19,14 +19,21 @@ jobs:
     
     strategy:
       matrix:
-        service:
-          - api-gateway
-          - vision-svc
-          - risk-svc
-          - identity-svc
-          - dashboard-svc
-          - ml-monitor-svc
-          - tariff-sync-svc
+        include:
+          - service: api-gateway
+            dockerfile: ./services/api-gateway/Dockerfile
+          - service: vision-svc
+            dockerfile: ./services/Dockerfile.python
+          - service: risk-svc
+            dockerfile: ./services/Dockerfile.python
+          - service: identity-svc
+            dockerfile: ./services/identity-svc/Dockerfile
+          - service: dashboard-svc
+            dockerfile: ./services/dashboard-svc/Dockerfile
+          - service: ml-monitor-svc
+            dockerfile: ./services/Dockerfile.python
+          - service: tariff-sync-svc
+            dockerfile: ./services/Dockerfile.python
     
     steps:
     - name: Checkout
@@ -57,6 +64,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./services/${{ matrix.service }}
+        file: ${{ matrix.dockerfile }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}

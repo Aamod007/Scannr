@@ -1,6 +1,7 @@
 from typing import Dict
 from app.features.assemble import top_features
 
+
 def predict_risk(features: Dict) -> Dict:
     trust_weight = 0.40
     vision_weight = 0.30
@@ -11,7 +12,9 @@ def predict_risk(features: Dict) -> Dict:
     trust_score = features["blockchain_trust_score"]
     vision_score = 100 if features["vision_anomaly_flag"] else 0
     cargo_score = min(features["cargo_declared_value"] / 1000000, 100)
-    route_score = features["route_origin_risk_index"] * 50 + features["route_transshipment_count"] * 10
+    route_score = (
+        features["route_origin_risk_index"] * 50 + features["route_transshipment_count"] * 10
+    )
     intel_score = 0
     if features["intel_ofac_match"]:
         intel_score += 50
@@ -21,11 +24,11 @@ def predict_risk(features: Dict) -> Dict:
         intel_score += 20
 
     risk_score = (
-        trust_score * trust_weight +
-        vision_score * vision_weight +
-        cargo_score * cargo_weight +
-        route_score * route_weight +
-        intel_score * intel_weight
+        trust_score * trust_weight
+        + vision_score * vision_weight
+        + cargo_score * cargo_weight
+        + route_score * route_weight
+        + intel_score * intel_weight
     )
     risk_score = max(0, min(100, risk_score))
 
