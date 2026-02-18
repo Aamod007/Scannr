@@ -15,7 +15,10 @@ let redisClient = null;
 
 async function getRedisClient() {
   if (!redisClient) {
-    const redisUrl = process.env.REDIS_URL || 'redis://redis:6379/0';
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) {
+      return null;
+    }
     redisClient = createClient({ url: redisUrl });
     redisClient.on('error', (err) => console.error('Redis Client Error', err));
     try {

@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime, timezone
 
 from app.db.connection import get_db_pool
 
@@ -15,15 +14,14 @@ async def officer_override(payload: dict):
     async with pool.acquire() as conn:
         # Check if clearance exists
         row = await conn.fetchrow(
-            "SELECT id, lane FROM clearance_decisions WHERE id = $1",
-            clearance_id
+            "SELECT id, lane FROM clearance_decisions WHERE id = $1", clearance_id
         )
-        
+
         if row is None:
             return {"error": "Clearance not found"}
-        
+
         original_lane = row["lane"]
-        
+
         # Update clearance_decisions
         await conn.execute(
             """
@@ -34,9 +32,9 @@ async def officer_override(payload: dict):
             override_to,
             True,
             reason,
-            clearance_id
+            clearance_id,
         )
-        
+
         # Insert into officer_overrides table
         override_id = f"OV-{uuid.uuid4().hex[:8]}"
         await conn.execute(
@@ -48,9 +46,9 @@ async def officer_override(payload: dict):
             officer_id,
             original_lane,
             override_to,
-            reason
+            reason,
         )
-        
+
         # Add to ML training queue for feedback loop
         await conn.execute(
             """
@@ -59,7 +57,7 @@ async def officer_override(payload: dict):
             """,
             clearance_id,
             False,  # AI was incorrect since officer overrode
-            override_to
+            override_to,
         )
 
     return {"status": "ok", "override_id": override_id}

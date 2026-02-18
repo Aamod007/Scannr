@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+
 def assemble_features(payload: Dict) -> Dict:
     return {
         "blockchain_trust_score": payload.get("blockchain_trust_score", 50.0),
@@ -23,6 +24,7 @@ def assemble_features(payload: Dict) -> Dict:
         "intel_interpol_alert": payload.get("intel_interpol_alert", False),
         "intel_seasonal_index": payload.get("intel_seasonal_index", 1.0),
     }
+
 
 def top_features(features: Dict) -> List[Dict]:
     return [

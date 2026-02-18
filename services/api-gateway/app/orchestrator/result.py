@@ -15,12 +15,12 @@ async def get_clearance(clearance_id: str):
             FROM clearance_decisions 
             WHERE id = $1
             """,
-            clearance_id
+            clearance_id,
         )
-        
+
         if row is None:
             return None
-            
+
         return {
             "clearance_id": str(row["id"]),
             "container_id": row["container_id"],
@@ -28,14 +28,16 @@ async def get_clearance(clearance_id: str):
             "risk_score": float(row["risk_score"]),
             "lane": row["lane"],
             "vision_anomaly": row["vision_anomaly"],
-            "vision_confidence": float(row["vision_confidence"]) if row["vision_confidence"] else None,
+            "vision_confidence": (
+                float(row["vision_confidence"]) if row["vision_confidence"] else None
+            ),
             "blockchain_trust": float(row["blockchain_trust"]) if row["blockchain_trust"] else None,
             "heatmap_s3_url": row["heatmap_s3_url"],
             "officer_override": row["officer_override"],
             "override_reason": row["override_reason"],
             "created_at": row["created_at"].isoformat() if row["created_at"] else None,
             "audit_hash": row["audit_hash"],
-            "status": "COMPLETED"
+            "status": "COMPLETED",
         }
 
 
@@ -53,7 +55,7 @@ async def store_clearance(clearance_id: str, decision: dict):
             decision.get("officer_override", False),
             decision.get("override_reason"),
             decision.get("audit_hash"),
-            clearance_id
+            clearance_id,
         )
 
 
