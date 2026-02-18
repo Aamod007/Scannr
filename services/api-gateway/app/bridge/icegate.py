@@ -27,7 +27,7 @@ class ICEGATEBridge:
         except ET.ParseError as e:
             return {"error": f"Invalid XML: {str(e)}"}
     
-    def _xml_to_dict_recursive(self, element: ET.Element) -> Dict:
+    def _xml_to_dict_recursive(self, element: ET.Element):
         """Recursively convert XML element to dictionary."""
         result = {}
         

@@ -31,6 +31,8 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
 
 # IDE
 .vscode/
@@ -43,22 +45,72 @@ yarn-error.log*
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.nox/
 
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Docker
 *.log
+docker-compose.override.yml
 
 # Database
 *.db
 *.sqlite
+*.sqlite3
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.backup
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ML Models (large files)
+*.pth
+*.pt
+*.onnx
+*.engine
+models/
+checkpoints/
+
+# Data files
+data/
+datasets/
+*.csv
+*.parquet
+*.h5
+*.hdf5
+
+# Documentation build
+docs/_build/
+site/
+
+# Misc
+.cache/
+.mypy_cache/
+.pytype/
+cython_debug/
