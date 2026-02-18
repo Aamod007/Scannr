@@ -1,14 +1,331 @@
-<!doctype html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SCANNR - AI Customs Clearance</title>
-    <meta name="description" content="AI-Enabled Risk-Based Customs Clearance Engine" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SCANNR Tariff Sync Status</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1e3b8a",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121620",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 h-screen overflow-hidden">
+    <div class="flex h-full w-full">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-primary text-white flex flex-col shrink-0 border-r border-primary/20">
+            <div class="p-6 flex flex-col gap-8">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">barcode_scanner</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <h1 class="text-lg font-bold leading-tight tracking-tight">SCANNR</h1>
+                        <p class="text-xs text-white/60 font-medium">Tariff Management</p>
+                    </div>
+                </div>
+                <!-- Nav Links -->
+                <nav class="flex flex-col gap-1">
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-white/70" href="#">
+                        <span class="material-symbols-outlined text-[22px]">grid_view</span>
+                        <span class="text-sm font-medium">Dashboard</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-white/70" href="#">
+                        <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+                        <span class="text-sm font-medium">Tariffs</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/20 text-white transition-colors" href="#">
+                        <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1">history</span>
+                        <span class="text-sm font-medium">Sync Logs</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-white/70" href="#">
+                        <span class="material-symbols-outlined text-[22px]">settings</span>
+                        <span class="text-sm font-medium">Settings</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="mt-auto p-6">
+                <button class="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 py-2.5 rounded-lg text-sm font-bold transition-all">
+                    <span class="material-symbols-outlined text-sm">support_agent</span>
+                    Support
+                </button>
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Topbar -->
+            <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8 shrink-0">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-lg font-bold text-slate-800">Tariff Sync Dashboard</h2>
+                    <div class="h-4 w-[1px] bg-slate-200"></div>
+                    <div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                        <a class="hover:text-primary" href="#">Overview</a>
+                        <span class="text-slate-300">/</span>
+                        <span class="text-slate-800">Sync Status</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative w-64">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                        <input class="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400" placeholder="Search HS codes..." type="text"/>
+                    </div>
+                    <button class="w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
+                        <div class="flex flex-col items-end">
+                            <span class="text-sm font-bold text-slate-800 leading-none">Alex Rivera</span>
+                            <span class="text-xs text-slate-500">Compliance Lead</span>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden ring-2 ring-slate-100">
+                            <img alt="User avatar" src="https://ui-avatars.com/api/?name=Alex+Rivera&background=1e3b8a&color=fff" class="w-full h-full object-cover"/>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-8 bg-background-light">
+                <div class="max-w-5xl mx-auto flex flex-col gap-6">
+                    <!-- Page Heading -->
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex flex-col gap-1">
+                            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Tariff Sync - Budget 2026-27</h1>
+                            <p class="text-slate-500 font-medium">Monitoring real-time regulatory updates from the Central Board of Indirect Taxes and Customs.</p>
+                        </div>
+                        <button id="syncBtn" class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg shadow-primary/20 active:scale-95">
+                            <span class="material-symbols-outlined">sync</span>
+                            Force Sync Now
+                        </button>
+                    </div>
+                    <!-- Status Header Card -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-emerald-600 text-2xl">check_circle</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg font-bold text-slate-900 leading-none">Synced</span>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">Operational</span>
+                                </div>
+                                <p class="text-slate-500 text-sm font-medium">Last sync: <span id="lastSyncTime" class="text-slate-900">Feb 18, 2026 06:12AM</span> | Source: <span class="text-primary font-semibold underline decoration-2 underline-offset-4 cursor-pointer hover:text-blue-700">CBIC Tariff API</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">View Logs</button>
+                            <button class="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all">Sync Settings</button>
+                        </div>
+                    </div>
+                    <!-- Recent Changes List -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between px-2">
+                            <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-400">update</span>
+                                Recent Changes List
+                            </h3>
+                            <button class="text-sm font-bold text-primary hover:underline">View All Updates</button>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">HS Code & Description</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status Change</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Checked Date</th>
+                                            <th class="px-6 py-4 text-right"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="changesTable" class="divide-y divide-slate-100">
+                                        <!-- Item 1 -->
+                                        <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <td class="px-6 py-5">
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-bold text-slate-900">HS 8507</span>
+                                                    <span class="text-sm text-slate-500 font-medium">Electric accumulators, including separators; Lithium batteries</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                                                        <span class="material-symbols-outlined text-sm leading-none">trending_up</span>
+                                                        <span class="text-xs font-bold">+15% risk weight</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-sm text-slate-600 font-medium">Updated Feb 18</span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right">
+                                                <button class="text-slate-400 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined">more_vert</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <!-- Item 2 -->
+                                        <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <td class="px-6 py-5">
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-bold text-slate-900">HS 2709</span>
+                                                    <span class="text-sm text-slate-500 font-medium">Petroleum oils and oils obtained from bituminous minerals, crude</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                                        <span class="material-symbols-outlined text-sm leading-none">remove_circle_outline</span>
+                                                        <span class="text-xs font-bold">No change</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-sm text-slate-600 font-medium">Checked Feb 18</span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right">
+                                                <button class="text-slate-400 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined">more_vert</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <!-- Item 3 -->
+                                        <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <td class="px-6 py-5">
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-bold text-slate-900">HS 1006</span>
+                                                    <span class="text-sm text-slate-500 font-medium">Rice, husked, semi-milled or wholly milled</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                        <span class="material-symbols-outlined text-sm leading-none">trending_down</span>
+                                                        <span class="text-xs font-bold">-5% tariff reduction</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-sm text-slate-600 font-medium">Updated Feb 17</span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right">
+                                                <button class="text-slate-400 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined">more_vert</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Sync Stats Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                            <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">Sync Success Rate</span>
+                            <div class="flex items-end gap-2">
+                                <span class="text-3xl font-black text-slate-900">99.8%</span>
+                                <span class="text-emerald-600 text-sm font-bold pb-1 flex items-center">
+                                    <span class="material-symbols-outlined text-sm">arrow_upward</span>
+                                    0.2%
+                                </span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 99.8%;"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                            <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">Items Tracked</span>
+                            <div class="flex items-end gap-2">
+                                <span class="text-3xl font-black text-slate-900">12,482</span>
+                            </div>
+                            <p class="text-slate-400 text-xs font-medium">Across 97 chapters of HS code</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                            <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">Avg Sync Time</span>
+                            <div class="flex items-end gap-2">
+                                <span class="text-3xl font-black text-slate-900">1.4s</span>
+                                <span class="text-slate-400 text-xs font-medium pb-1">per request</span>
+                            </div>
+                            <div class="flex gap-1 mt-2">
+                                <div class="h-6 w-1 rounded-sm bg-primary/20"></div>
+                                <div class="h-8 w-1 rounded-sm bg-primary/40"></div>
+                                <div class="h-10 w-1 rounded-sm bg-primary/60"></div>
+                                <div class="h-6 w-1 rounded-sm bg-primary/20"></div>
+                                <div class="h-12 w-1 rounded-sm bg-primary"></div>
+                                <div class="h-8 w-1 rounded-sm bg-primary/40"></div>
+                                <div class="h-6 w-1 rounded-sm bg-primary/20"></div>
+                                <div class="h-10 w-1 rounded-sm bg-primary/60"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sync button functionality
+        document.getElementById('syncBtn').addEventListener('click', function() {
+            const btn = this;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            
+            // Add spinning animation
+            icon.style.animation = 'spin 1s linear infinite';
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            
+            // Simulate sync
+            setTimeout(() => {
+                icon.style.animation = '';
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                
+                // Update last sync time
+                const now = new Date();
+                const timeString = now.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('lastSyncTime').textContent = timeString;
+                
+                alert('Sync completed successfully!');
+            }, 2000);
+        });
+
+        // Add CSS animation for spin
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
 </html>
