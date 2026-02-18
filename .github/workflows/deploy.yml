@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: scannr
+  IMAGE_PREFIX: ${{ github.repository_owner }}
 
 jobs:
   build:
@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     
     strategy:
       matrix:
