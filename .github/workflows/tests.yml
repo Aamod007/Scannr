@@ -1,0 +1,121 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16.2
+        env:
+          POSTGRES_USER: scannr
+          POSTGRES_PASSWORD: scannr
+          POSTGRES_DB: scannr
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-asyncio httpx
+        pip install -r services/api-gateway/requirements.txt
+        pip install -r services/vision-svc/requirements.txt
+        pip install -r services/risk-svc/requirements.txt
+        pip install -r services/ml-monitor-svc/requirements.txt
+    
+    - name: Run unit tests
+      run: |
+        pytest services/api-gateway/tests/ -v
+        pytest services/vision-svc/tests/ -v
+        pytest services/risk-svc/tests/ -v
+        pytest services/ml-monitor-svc/tests/ -v
+      env:
+        POSTGRES_URL: postgresql://scannr:scannr@localhost:5432/scannr
+        REDIS_URL: redis://localhost:6379/0
+    
+    - name: Run security tests
+      run: |
+        pytest tests/security/ -v
+
+  test-node:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          services/dashboard-svc/package.json
+          services/identity-svc/package.json
+    
+    - name: Install dashboard dependencies
+      working-directory: services/dashboard-svc
+      run: npm ci
+    
+    - name: Build dashboard
+      working-directory: services/dashboard-svc
+      run: npm run build
+    
+    - name: Install identity-svc dependencies
+      working-directory: services/identity-svc
+      run: npm ci
+    
+    - name: Run identity tests
+      working-directory: services/identity-svc
+      run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install linting tools
+      run: |
+        pip install flake8 black
+    
+    - name: Lint with flake8
+      run: |
+        flake8 services/ --max-line-length=100 --ignore=E501,W503 --exclude=venv,__pycache__
+    
+    - name: Check formatting with black
+      run: |
+        black services/ --line-length=100 --check
