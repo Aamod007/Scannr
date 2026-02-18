@@ -55,13 +55,13 @@ jobs:
     - name: Run unit tests
       run: |
         cd services/api-gateway
-        pytest tests/ -v
+        PYTHONPATH=. pytest tests/ -v
         cd ../vision-svc
-        pytest tests/ -v
+        PYTHONPATH=. pytest tests/ -v
         cd ../risk-svc
-        pytest tests/ -v
+        PYTHONPATH=. pytest tests/ -v
         cd ../ml-monitor-svc
-        pytest tests/ -v
+        PYTHONPATH=. pytest tests/ -v
         cd ../..
       env:
         POSTGRES_URL: postgresql://scannr:scannr@localhost:5432/scannr
