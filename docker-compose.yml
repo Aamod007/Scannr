@@ -1,0 +1,78 @@
+services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=local
+      - POSTGRES_URL=postgresql://scannr:scannr@postgres:5432/scannr
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+  vision-svc:
+    build:
+      context: ./services/vision-svc
+      dockerfile: ../Dockerfile.python
+    ports:
+      - "8001:8000"
+  risk-svc:
+    build:
+      context: ./services/risk-svc
+      dockerfile: ../Dockerfile.python
+    ports:
+      - "8002:8000"
+  tariff-sync-svc:
+    build:
+      context: ./services/tariff-sync-svc
+      dockerfile: ../Dockerfile.python
+    ports:
+      - "8003:8000"
+  ml-monitor-svc:
+    build:
+      context: ./services/ml-monitor-svc
+      dockerfile: ../Dockerfile.python
+    ports:
+      - "8004:8000"
+  identity-svc:
+    build:
+      context: ./services/identity-svc
+    ports:
+      - "8005:8000"
+  dashboard-svc:
+    build:
+      context: ./services/dashboard-svc
+    ports:
+      - "8006:8000"
+  postgres:
+    image: postgres:16.2
+    environment:
+      - POSTGRES_USER=scannr
+      - POSTGRES_PASSWORD=scannr
+      - POSTGRES_DB=scannr
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  couchdb:
+    image: couchdb:3.3.3
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=admin
+    ports:
+      - "5984:5984"
+volumes:
+  postgres_data:
