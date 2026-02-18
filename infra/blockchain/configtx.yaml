@@ -1,0 +1,242 @@
+Organizations:
+  - &CBIC
+    Name: CBIC
+    ID: CBICMSP
+    MSPDir: crypto-config/peerOrganizations/cbic.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('CBICMSP.admin', 'CBICMSP.peer', 'CBICMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('CBICMSP.admin', 'CBICMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('CBICMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.cbic.example.com
+        Port: 7051
+  - &Port1
+    Name: Port1
+    ID: Port1MSP
+    MSPDir: crypto-config/peerOrganizations/port1.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Port1MSP.admin', 'Port1MSP.peer', 'Port1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Port1MSP.admin', 'Port1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Port1MSP.admin')"
+    AnchorPeers:
+      - Host: peer0.port1.example.com
+        Port: 7051
+  - &Port2
+    Name: Port2
+    ID: Port2MSP
+    MSPDir: crypto-config/peerOrganizations/port2.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Port2MSP.admin', 'Port2MSP.peer', 'Port2MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Port2MSP.admin', 'Port2MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Port2MSP.admin')"
+    AnchorPeers:
+      - Host: peer0.port2.example.com
+        Port: 7051
+  - &Port3
+    Name: Port3
+    ID: Port3MSP
+    MSPDir: crypto-config/peerOrganizations/port3.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Port3MSP.admin', 'Port3MSP.peer', 'Port3MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Port3MSP.admin', 'Port3MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Port3MSP.admin')"
+    AnchorPeers:
+      - Host: peer0.port3.example.com
+        Port: 7051
+  - &Port4
+    Name: Port4
+    ID: Port4MSP
+    MSPDir: crypto-config/peerOrganizations/port4.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Port4MSP.admin', 'Port4MSP.peer', 'Port4MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Port4MSP.admin', 'Port4MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Port4MSP.admin')"
+    AnchorPeers:
+      - Host: peer0.port4.example.com
+        Port: 7051
+  - &GSTN
+    Name: GSTN
+    ID: GSTNMSP
+    MSPDir: crypto-config/peerOrganizations/gstn.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('GSTNMSP.admin', 'GSTNMSP.peer', 'GSTNMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('GSTNMSP.admin', 'GSTNMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('GSTNMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.gstn.example.com
+        Port: 7051
+  - &MHA
+    Name: MHA
+    ID: MHAMSP
+    MSPDir: crypto-config/peerOrganizations/mha.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('MHAMSP.admin', 'MHAMSP.peer', 'MHAMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('MHAMSP.admin', 'MHAMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('MHAMSP.admin')"
+    AnchorPeers:
+      - Host: peer0.mha.example.com
+        Port: 7051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Capabilities:
+    <<: *ApplicationCapabilities
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer0.example.com:7050
+    - orderer1.example.com:7050
+    - orderer2.example.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Capabilities:
+    <<: *OrdererCapabilities
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  TwoOrgsOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *CBIC
+      Capabilities:
+        <<: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *CBIC
+        - *Port1
+        - *Port2
+        - *Port3
+        - *Port4
+        - *GSTN
+        - *MHA
+      Capabilities:
+        <<: *ApplicationCapabilities
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *CBIC
+          - *Port1
+          - *Port2
+          - *Port3
+          - *Port4
+          - *GSTN
+          - *MHA
+  IndiaSingaporeTrade:
+    <<: *ChannelDefaults
+    Consortiums:
+      IndiaSingaporeTradeConsortium:
+        Organizations:
+          - *CBIC
+          - *Port1
+          - *Port2
+          - *Port3
+          - *Port4
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *CBIC
+        - *Port1
+        - *Port2
+        - *Port3
+        - *Port4
+      Capabilities:
+        <<: *ApplicationCapabilities

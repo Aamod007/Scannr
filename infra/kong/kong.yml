@@ -1,0 +1,59 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: api-gateway
+    url: http://api-gateway:8000
+    routes:
+      - name: api-gateway-route
+        paths:
+          - /api
+        strip_path: true
+
+  - name: vision-svc
+    url: http://vision-svc:8000
+    routes:
+      - name: vision-route
+        paths:
+          - /vision
+        strip_path: true
+
+  - name: risk-svc
+    url: http://risk-svc:8000
+    routes:
+      - name: risk-route
+        paths:
+          - /risk
+        strip_path: true
+
+  - name: identity-svc
+    url: http://identity-svc:8000
+    routes:
+      - name: identity-route
+        paths:
+          - /identity
+        strip_path: true
+
+  - name: dashboard-svc
+    url: http://dashboard-svc:8000
+    routes:
+      - name: dashboard-route
+        paths:
+          - /dashboard
+        strip_path: true
+
+plugins:
+  - name: rate-limiting
+    config:
+      minute: 10000
+
+  - name: jwt
+    config:
+      key_claim_name: "iss"
+      secret_is_base64: false
+
+  - name: request-termination
+    config:
+      status_code: 401
+      message: "Authentication required"
+    enabled: false
