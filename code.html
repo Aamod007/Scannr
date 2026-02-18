@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SCANNR Live Queue - Command Center</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            scannr: {
+              navy: '#1E3A8A',
+              saffron: '#FF9933',
+              dark: '#0A0C10',
+              card: 'rgba(23, 25, 30, 0.8)',
+              border: 'rgba(255, 255, 255, 0.1)',
+              laneGreen: '#10B981',
+              laneAmber: '#F59E0B',
+              laneRed: '#EF4444'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-glassmorphism">
+    .glass-card {
+      background: rgba(23, 25, 35, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .neon-glow-green {
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+    .neon-glow-red {
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+    body {
+      background: radial-gradient(circle at top right, #1a1c23, #0A0C10);
+      color: #e2e8f0;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- BEGIN: Sidebar -->
+<aside class="w-20 lg:w-64 bg-scannr-dark border-r border-scannr-border flex flex-col items-center py-6 transition-all duration-300">
+<div class="mb-10 px-4 w-full flex justify-center lg:justify-start items-center gap-3">
+<div class="w-10 h-10 bg-scannr-navy rounded-lg flex items-center justify-center shadow-lg shadow-scannr-navy/20">
+<span class="text-white font-bold text-xl">S</span>
+</div>
+<span class="hidden lg:block font-bold text-xl tracking-tight text-white">SCANNR <span class="text-scannr-saffron">LIVE</span></span>
+</div>
+<nav class="flex-1 w-full px-3 space-y-2">
+<a class="flex items-center gap-3 p-3 rounded-xl bg-scannr-navy/20 text-blue-400 border border-scannr-navy/30" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="hidden lg:block font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="hidden lg:block font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="hidden lg:block font-medium">Operators</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="hidden lg:block font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 w-full">
+<div class="p-3 bg-scannr-saffron/10 border border-scannr-saffron/20 rounded-xl hidden lg:block">
+<p class="text-[10px] text-scannr-saffron uppercase font-bold tracking-wider mb-1">System Health</p>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-scannr-laneGreen animate-pulse"></div>
+<span class="text-xs text-gray-300 font-medium">Optimal Performance</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+<!-- BEGIN: Header Section -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div data-purpose="header-titles">
+<h1 class="text-3xl font-bold text-white tracking-tight">Customs Command Center</h1>
+<p class="text-gray-400 text-sm mt-1">Live throughput monitoring and risk assessment.</p>
+</div>
+<div class="flex items-center gap-4 bg-scannr-dark/50 p-1.5 rounded-xl border border-scannr-border">
+<div class="px-4 py-2 bg-scannr-navy rounded-lg text-white font-medium text-sm cursor-pointer shadow-lg shadow-scannr-navy/20">
+            Live Feed
+          </div>
+<div class="px-4 py-2 text-gray-400 font-medium text-sm cursor-pointer hover:text-white transition-colors">
+            Historical Logs
+          </div>
+</div>
+</header>
+<!-- END: Header Section -->
+<!-- BEGIN: Top Stats Bar -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-purpose="stats-overview">
+<!-- Card 1: Today -->
+<div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-scannr-navy/50 transition-all">
+<div class="relative z-10">
+<p class="text-gray-400 text-sm font-medium">Total Scanned (Today)</p>
+<div class="flex items-end justify-between mt-2">
+<h3 class="text-3xl font-bold text-white">42,891</h3>
+<span class="text-scannr-laneGreen text-xs font-bold bg-scannr-laneGreen/10 px-2 py-1 rounded-md flex items-center">
+<svg class="w-3 h-3 mr-1" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" fill-rule="evenodd"></path></svg>
+                12.4%
+              </span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-scannr-navy w-3/4 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Cleared -->
+<div class="glass-card p-5 rounded-2xl group hover:border-scannr-laneGreen/50 transition-all">
+<p class="text-gray-400 text-sm font-medium">Successfully Cleared</p>
+<div class="flex items-end justify-between mt-2">
+<h3 class="text-3xl font-bold text-white">41,202</h3>
+<span class="text-scannr-laneGreen text-xs font-bold bg-scannr-laneGreen/10 px-2 py-1 rounded-md">96.1% Rate</span>
+</div>
+<div class="mt-4 flex items-center gap-1">
+<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
+<div class="w-full bg-scannr-laneGreen h-[40%] rounded-sm opacity-50"></div>
+</div>
+<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
+<div class="w-full bg-scannr-laneGreen h-[60%] rounded-sm opacity-60"></div>
+</div>
+<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
+<div class="w-full bg-scannr-laneGreen h-[90%] rounded-sm opacity-100"></div>
+</div>
+<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
+<div class="w-full bg-scannr-laneGreen h-[75%] rounded-sm opacity-80"></div>
+</div>
+</div>
+</div>
+<!-- Card 3: Pending -->
+<div class="glass-card p-5 rounded-2xl group hover:border-scannr-laneAmber/50 transition-all">
+<p class="text-gray-400 text-sm font-medium">Pending Manual Review</p>
+<div class="flex items-end justify-between mt-2">
+<h3 class="text-3xl font-bold text-white">1,644</h3>
+<span class="text-scannr-laneAmber text-xs font-bold bg-scannr-laneAmber/10 px-2 py-1 rounded-md">Warning Threshold</span>
+</div>
+<div class="mt-4">
+<div class="flex justify-between text-[10px] text-gray-500 mb-1">
+<span>Avg Wait: 4.2m</span>
+<span>Target: &lt;5.0m</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-scannr-laneAmber w-4/5 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Card 4: Seized -->
+<div class="glass-card p-5 rounded-2xl border-scannr-laneRed/20 group hover:border-scannr-laneRed/50 transition-all">
+<p class="text-gray-400 text-sm font-medium">Risk Seizures</p>
+<div class="flex items-end justify-between mt-2">
+<h3 class="text-3xl font-bold text-scannr-laneRed drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]">45</h3>
+<span class="text-scannr-laneRed text-xs font-bold bg-scannr-laneRed/10 px-2 py-1 rounded-md">+4 Today</span>
+</div>
+<div class="mt-4 flex items-center gap-2">
+<div class="animate-pulse w-2 h-2 rounded-full bg-scannr-laneRed neon-glow-red"></div>
+<span class="text-[10px] text-scannr-laneRed font-bold tracking-widest uppercase">Action Required</span>
+</div>
+</div>
+</section>
+<!-- END: Top Stats Bar -->
+<!-- BEGIN: Main Dashboard Content -->
+<section class="grid grid-cols-1 xl:grid-cols-3 gap-6" data-purpose="main-layout-grid">
+<!-- BEGIN: Active Queue Table -->
+<div class="xl:col-span-2 glass-card rounded-2xl flex flex-col overflow-hidden">
+<div class="p-6 border-b border-scannr-border flex justify-between items-center bg-white/5">
+<h2 class="text-lg font-bold text-white">Active Processing Queue</h2>
+<div class="flex items-center gap-3">
+<div class="relative">
+<input class="bg-scannr-dark border-scannr-border text-xs rounded-lg pl-9 pr-4 py-2 focus:ring-scannr-navy focus:border-scannr-navy w-48 transition-all" placeholder="Search manifest..." type="text"/>
+<svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<button class="p-2 bg-white/5 rounded-lg border border-scannr-border hover:bg-white/10 transition-colors">
+<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-[10px] text-gray-500 uppercase tracking-widest border-b border-scannr-border">
+<th class="px-6 py-4 font-semibold">Manifest ID</th>
+<th class="px-6 py-4 font-semibold">Origin</th>
+<th class="px-6 py-4 font-semibold">Status</th>
+<th class="px-6 py-4 font-semibold">Risk Index</th>
+<th class="px-6 py-4 font-semibold">Operator</th>
+<th class="px-6 py-4 font-semibold">Actions</th>
+</tr>
+</thead>
+<tbody class="text-sm divide-y divide-scannr-border/50">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-scannr-laneGreen rounded-full"></div>
+<div>
+<p class="font-bold text-white">#QX-8829</p>
+<p class="text-[10px] text-gray-500">Express Freight</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-gray-300">Singapore (SIN)</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneGreen/10 text-scannr-laneGreen border border-scannr-laneGreen/30 uppercase tracking-wide">In Processing</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
+<div class="h-full bg-scannr-laneGreen w-[15%] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
+</div>
+<span class="text-xs font-medium text-gray-400">1.2%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-white/10">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeO5illny6u8POfPYn5g-Y669aIFx6y7aC3a-uVGVndzgpDKmxpGZsfcTu4mV5n81j4MmSCCWhqOCrpPm6MMnMNgxZkBYSU2EqGl4v4uppBEXymgDwYQO1EzhCuRJ9-HoozTKRzYNn5ymRCoHP2mwCfK5SNv4ka9ab5u6Oy5XQyK2PBVT6RcVh0xTLJlY8Pz-eTg3IoLl9CP4FZ99cYdJ1mVhAKjUO-8U4PXdR-3h_3deE1LnMz3a9IJn690laW12EXlCqqDVZLhc"/>
+</div>
+<span class="text-xs text-gray-400">J. Doe</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<button class="text-scannr-navy hover:text-blue-400 font-bold text-xs uppercase tracking-tighter transition-colors">Details</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-scannr-laneRed/5 hover:bg-scannr-laneRed/10 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-scannr-laneRed rounded-full shadow-lg shadow-scannr-laneRed/20"></div>
+<div>
+<p class="font-bold text-white text-scannr-laneRed">#QX-7742</p>
+<p class="text-[10px] text-gray-500">High-Value Cargo</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-gray-300">Rotterdam (RTM)</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneRed/10 text-scannr-laneRed border border-scannr-laneRed/30 uppercase tracking-wide">Interdiction</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
+<div class="h-full bg-scannr-laneRed w-[92%] rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div>
+</div>
+<span class="text-xs font-bold text-scannr-laneRed">92.0%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-scannr-laneRed/30">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa6EhB80qzjA2E76Bv5iNg6SWvr7ihg95qrbYEiBbpYAqfylk3rqSF7RGl7MKZGDU7DtRpNltrvtRUJIyF82VvOldY7-ehRByjRl9PoSCjpEFX_EXaCU0FdF54HOy-i9ZcNbWt5Zpo-Pj7d_WPpuhNQ0wDpqiM1fGtB3cJVDL1gYvW4Bzj6yO7EU5Wsn1VL9YofNSXeOlarrYeWmbvjljgMUWiYuqNMDSHVFINWHuvrRODXeHQPLhemzBFqIQ0cypywtfZuOtoiVI"/>
+</div>
+<span class="text-xs text-gray-400">A. Miller</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<button class="bg-scannr-laneRed text-white px-3 py-1.5 rounded-md font-bold text-[10px] uppercase tracking-tighter hover:bg-red-600 transition-colors shadow-lg shadow-scannr-laneRed/20">Investigate</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-scannr-laneAmber rounded-full"></div>
+<div>
+<p class="font-bold text-white">#QX-9012</p>
+<p class="text-[10px] text-gray-500">Bulk Transit</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-gray-300">Shanghai (SHA)</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneAmber/10 text-scannr-laneAmber border border-scannr-laneAmber/30 uppercase tracking-wide">Flagged</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
+<div class="h-full bg-scannr-laneAmber w-[48%] rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div>
+</div>
+<span class="text-xs font-medium text-gray-400">48.5%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-white/10">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf9WaNMnPQ2kgARJKIHYswhF3HWmodZsy3XLEsBo1bQ6iKmQRfziR5Mr9qBpTaW6tds3eNsPfi4gNENlq8uE9ztoRdGOMAXn8EgL5Tps_oQfXHlFE3180-MitdMIRn2UhUlclV8vVRWfQrnsHJlFH7Owq7LvOZy8PMDuEvkLqwmRvDhqSdZjwYeyb9OxjhW8D6PkDcUM-tAsxI1g2ApHxqWOXbbHOPaU8uPbmrV6HO9-iH6c1Ob5O6GcGOQeCfEYrBcLJT8mkGaD4"/>
+</div>
+<span class="text-xs text-gray-400">S. Kumar</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<button class="text-scannr-navy hover:text-blue-400 font-bold text-xs uppercase tracking-tighter transition-colors">Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-auto p-4 border-t border-scannr-border flex justify-between items-center bg-scannr-dark/30">
+<p class="text-[10px] text-gray-500 font-medium">Showing 3 of 152 items</p>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-md hover:bg-white/10 text-gray-500 disabled:opacity-30" disabled="">←</button>
+<button class="p-1.5 rounded-md hover:bg-white/10 text-gray-300">→</button>
+</div>
+</div>
+</div>
+<!-- END: Active Queue Table -->
+<!-- BEGIN: Right Sidebar Widgets -->
+<div class="space-y-6">
+<!-- Widget: Risk Heatmap Placeholder -->
+<div class="glass-card p-6 rounded-2xl">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-white">Risk Heatmap</h3>
+<span class="text-[10px] text-scannr-saffron bg-scannr-saffron/10 px-2 py-1 rounded border border-scannr-saffron/20 font-bold uppercase">Live</span>
+</div>
+<div class="aspect-square bg-gradient-to-br from-scannr-dark to-scannr-navy/20 rounded-xl relative flex items-center justify-center border border-white/5 overflow-hidden group">
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- Simulated Canvas/Graph -->
+<div class="w-48 h-48 border-4 border-dashed border-white/10 rounded-full flex items-center justify-center relative">
+<div class="w-32 h-32 border-2 border-scannr-laneGreen/30 rounded-full flex items-center justify-center">
+<div class="w-16 h-16 bg-scannr-laneRed/40 rounded-full blur-xl animate-pulse"></div>
+<div class="w-4 h-4 bg-scannr-laneRed rounded-full shadow-[0_0_15px_rgba(239,68,68,1)] z-10"></div>
+</div>
+<div class="absolute top-0 right-0 w-2 h-2 bg-scannr-laneAmber rounded-full shadow-[0_0_10px_#F59E0B]"></div>
+</div>
+<div class="absolute bottom-4 left-4 right-4 flex justify-between text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+<span>Sector A</span>
+<span>Sector B</span>
+</div>
+</div>
+<div class="mt-6 space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-xs text-gray-400">Total Scan Speed</span>
+<span class="text-xs text-white font-bold">1.4s / unit</span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full">
+<div class="h-full bg-scannr-saffron w-2/3 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Widget: Notifications/Activities -->
+<div class="glass-card p-6 rounded-2xl flex-1">
+<h3 class="font-bold text-white mb-6 flex items-center gap-2">
+<span class="w-2 h-2 bg-scannr-saffron rounded-full"></span>
+              Recent Activity
+             </h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-laneRed/10 flex items-center justify-center flex-shrink-0 text-scannr-laneRed border border-scannr-laneRed/20">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold text-white">Risk Profile Matched</p>
+<p class="text-[11px] text-gray-400 mt-0.5">Manifest #QX-7742 flagged for prohibited content.</p>
+<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">2 MINS AGO</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-laneGreen/10 flex items-center justify-center flex-shrink-0 text-scannr-laneGreen border border-scannr-laneGreen/20">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold text-white">System Calibration</p>
+<p class="text-[11px] text-gray-400 mt-0.5">Sector 4 scanners recalibrated to 99.9% accuracy.</p>
+<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">15 MINS AGO</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-navy/10 flex items-center justify-center flex-shrink-0 text-scannr-navy border border-scannr-navy/20">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold text-white">Shift Change</p>
+<p class="text-[11px] text-gray-400 mt-0.5">Operator Sarah King logged in to Console B.</p>
+<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">1 HOUR AGO</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 bg-white/5 border border-scannr-border rounded-xl text-xs font-bold text-gray-400 uppercase tracking-widest hover:bg-white/10 transition-colors">
+               View All Activity
+             </button>
+</div>
+</div>
+<!-- END: Right Sidebar Widgets -->
+</section>
+<!-- END: Main Dashboard Content -->
+</main>
+</div>
+<!-- BEGIN: Interactive Overlay Placeholder -->
+<div class="fixed bottom-6 right-6" data-purpose="floating-status">
+<div class="bg-scannr-dark/80 backdrop-blur-md border border-scannr-border px-4 py-3 rounded-2xl flex items-center gap-4 shadow-2xl">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden"><img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4k5nrUxXSvgBbVijshW5oHJMdtfB9lulCsWmlRZkqaSM0JHi0PQLQH7mi8K3B7h655T-83TiG3t0sTr-InVE97vg6eveYrSNLEfKqAlkBbk9apdIhPCHOBNISpDtLGoxI6UbtEkmj1723AAlSAEOTZ8Zr0rKB-lFf4zqI9Tp_ont9BDanAu_bvl6ICvXZdWnmBG5GSO5HS5VRQjvCJniO5dpjAS7uG6eAsqUHN8dZN3r185CGcDxp0SalUeEQQZat520zZYrNGj0"/></div>
+<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden"><img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4F1bdNx9bsIzvA66Yi2Jahsxqc22EfotzDrtrYqjDvn6JY7SSo0BVEbAVUY3rT3jIocxhHQBecw4i1dbnP6emagpvPWjw-plc8vjoXtOpllwUjA4_Fgk34fGa8Jp75pHEBDl-myPQzzZwbAel8xw_P_S72JUDHeSx8mVrLQuxr-Zr7wPdllK1WD_3DoIWDibdGaWNO0wXNl1Zk1a72qpJfkN9scwh7Ov7eCEngonYjtTKCNoym_akWBJt6MmSOQeinS81arn57_I"/></div>
+<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden flex items-center justify-center bg-scannr-navy text-[10px] font-bold">+5</div>
+</div>
+<div class="h-8 w-px bg-scannr-border"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Active Operators</span>
+<span class="text-xs text-white font-medium">8 On Duty</span>
+</div>
+<div class="ml-4 w-10 h-10 bg-scannr-saffron rounded-full flex items-center justify-center text-black cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-scannr-saffron/20">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+<!-- END: Interactive Overlay Placeholder -->
+<script data-purpose="demo-interactivity">
+    // Mock simple logic for dashboard interactions
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('SCANNR Live Queue Dashboard Initialized');
+      
+      // Auto-update stats every 5 seconds for visual effect
+      setInterval(() => {
+        const seizedCount = document.querySelector('[data-purpose="stats-overview"] h3.text-scannr-laneRed');
+        if(seizedCount) {
+          // Subtle pulse effect already handled by CSS animate-pulse
+        }
+      }, 5000);
+    });
+  </script>
+</body></html>
