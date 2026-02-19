@@ -109,21 +109,21 @@ def detect_drift(
 
         # Kolmogorov-Smirnov test
         ks_stat, ks_p = ks_2samp(baseline_arr, recent_arr)
-        ks_drift = ks_p < KS_THRESHOLD
+        ks_drift = bool(ks_p < KS_THRESHOLD)
 
         # PSI
         psi = _calculate_psi(baseline_arr, recent_arr)
-        psi_drift = psi > PSI_THRESHOLD
+        psi_drift = bool(psi > PSI_THRESHOLD)
 
         drift_detected = ks_drift or psi_drift
         if drift_detected:
             any_drift = True
 
         feature_reports[name] = {
-            "ks_statistic": round(ks_stat, 4),
-            "ks_p_value": round(ks_p, 4),
+            "ks_statistic": round(float(ks_stat), 4),
+            "ks_p_value": round(float(ks_p), 4),
             "ks_drift": ks_drift,
-            "psi": round(psi, 4),
+            "psi": round(float(psi), 4),
             "psi_drift": psi_drift,
             "drift_detected": drift_detected,
             "baseline_mean": round(float(baseline_arr.mean()), 4),
