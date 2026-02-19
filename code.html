@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SCANNR Live Queue - Command Center</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Google Fonts: Inter -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<script>
+<html class="h-full" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>SCANNR PRO - Command Center</title>
+  <!-- Tailwind CSS v3 CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Material Symbols for Live Queue icons -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            scannr: {
-              navy: '#1E3A8A',
-              saffron: '#FF9933',
-              dark: '#0A0C10',
-              card: 'rgba(23, 25, 30, 0.8)',
-              border: 'rgba(255, 255, 255, 0.1)',
-              laneGreen: '#10B981',
-              laneAmber: '#F59E0B',
-              laneRed: '#EF4444'
+            brand: {
+              dark: '#0A0A0A',
+              card: '#161618',
+              accent: '#3B82F6',
+              neon: '#00F2FF',
+              amber: '#F59E0B',
+              red: '#EF4444',
+              green: '#10B981'
             }
           },
           fontFamily: {
@@ -31,418 +37,1954 @@
       }
     }
   </script>
-<style data-purpose="custom-glassmorphism">
+  <style data-purpose="custom-glassmorphism">
     .glass-card {
-      background: rgba(23, 25, 35, 0.7);
+      background: rgba(22, 22, 24, 0.7);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .neon-glow-green {
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+
+    .hexagon-grid {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      height: 100%;
+      mask-image: radial-gradient(circle, black 60%, transparent 100%);
     }
-    .neon-glow-red {
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+
+    .hex {
+      width: 24px;
+      height: 27.71px;
+      background-color: #1a1a1c;
+      margin: 1px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      transition: all 0.3s ease;
     }
-    body {
-      background: radial-gradient(circle at top right, #1a1c23, #0A0C10);
-      color: #e2e8f0;
+
+    .hex:hover {
+      transform: scale(1.1);
+      filter: brightness(1.5);
     }
+
+    .hex-blue-light {
+      background-color: #1e3a8a;
+    }
+
+    .hex-blue-med {
+      background-color: #2563eb;
+    }
+
+    .hex-blue-bright {
+      background-color: #60a5fa;
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+    }
+
+    .hex-neon {
+      background-color: #00F2FF;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+    }
+
+    /* Custom scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
     }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
+      background: #333;
       border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    .glow-text-neon {
+      text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+    }
+
+    .glow-pill-red {
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+    }
+
+    .glow-pill-green {
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .glow-pill-amber {
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+
+    /* Page transition */
+    .page-view {
+      transition: opacity 0.25s ease;
+    }
+
+    .page-view.hidden {
+      display: none;
+    }
+
+    /* Container Detail page styles */
+    .circular-chart {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      max-height: 250px;
+    }
+
+    .circle-bg {
+      fill: none;
+      stroke: #333;
+      stroke-width: 2.5;
+    }
+
+    .circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      animation: progress 1s ease-out forwards;
+    }
+
+    @keyframes progress {
+      0% {
+        stroke-dasharray: 0 100;
+      }
+    }
+
+    .percentage {
+      fill: #fff;
+      font-family: 'Inter', sans-serif;
+      font-weight: bold;
+      font-size: 0.5em;
+      text-anchor: middle;
+    }
+
+    .grad-cam-overlay {
+      background: radial-gradient(circle at 70% 60%, rgba(239, 68, 68, 0.6) 0%, rgba(245, 158, 11, 0.4) 25%, transparent 60%);
+      mix-blend-mode: color-dodge;
+    }
+
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #00F2FF;
+      box-shadow: 0 0 15px #00F2FF;
+      animation: scan 3s linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes scan {
+      0% {
+        top: 0%;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased">
-<div class="flex h-screen overflow-hidden">
-<!-- BEGIN: Sidebar -->
-<aside class="w-20 lg:w-64 bg-scannr-dark border-r border-scannr-border flex flex-col items-center py-6 transition-all duration-300">
-<div class="mb-10 px-4 w-full flex justify-center lg:justify-start items-center gap-3">
-<div class="w-10 h-10 bg-scannr-navy rounded-lg flex items-center justify-center shadow-lg shadow-scannr-navy/20">
-<span class="text-white font-bold text-xl">S</span>
-</div>
-<span class="hidden lg:block font-bold text-xl tracking-tight text-white">SCANNR <span class="text-scannr-saffron">LIVE</span></span>
-</div>
-<nav class="flex-1 w-full px-3 space-y-2">
-<a class="flex items-center gap-3 p-3 rounded-xl bg-scannr-navy/20 text-blue-400 border border-scannr-navy/30" href="#">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span class="hidden lg:block font-medium">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span class="hidden lg:block font-medium">Analytics</span>
-</a>
-<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span class="hidden lg:block font-medium">Operators</span>
-</a>
-<a class="flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 transition-colors" href="#">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span class="hidden lg:block font-medium">Settings</span>
-</a>
-</nav>
-<div class="mt-auto px-4 w-full">
-<div class="p-3 bg-scannr-saffron/10 border border-scannr-saffron/20 rounded-xl hidden lg:block">
-<p class="text-[10px] text-scannr-saffron uppercase font-bold tracking-wider mb-1">System Health</p>
-<div class="flex items-center gap-2">
-<div class="w-2 h-2 rounded-full bg-scannr-laneGreen animate-pulse"></div>
-<span class="text-xs text-gray-300 font-medium">Optimal Performance</span>
-</div>
-</div>
-</div>
-</aside>
-<!-- END: Sidebar -->
-<!-- Main Content -->
-<main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
-<!-- BEGIN: Header Section -->
-<header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-<div data-purpose="header-titles">
-<h1 class="text-3xl font-bold text-white tracking-tight">Customs Command Center</h1>
-<p class="text-gray-400 text-sm mt-1">Live throughput monitoring and risk assessment.</p>
-</div>
-<div class="flex items-center gap-4 bg-scannr-dark/50 p-1.5 rounded-xl border border-scannr-border">
-<div class="px-4 py-2 bg-scannr-navy rounded-lg text-white font-medium text-sm cursor-pointer shadow-lg shadow-scannr-navy/20">
-            Live Feed
+
+<body class="bg-brand-dark text-gray-300 font-sans h-full overflow-hidden flex relative">
+  <!-- Override Modal Overlay (hidden by default) -->
+  <div id="overrideModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden"
+    style="transition: opacity 0.2s ease;">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full bg-brand-red/10 flex items-center justify-center border border-brand-red/20">
+            <span class="material-symbols-outlined text-brand-red text-xl">gavel</span>
           </div>
-<div class="px-4 py-2 text-gray-400 font-medium text-sm cursor-pointer hover:text-white transition-colors">
-            Historical Logs
+          <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Override AI Decision</h2>
+            <p class="text-xs text-gray-400">Container ID: <span class="text-brand-neon font-mono">MSK-4002-X</span></p>
           </div>
-</div>
-</header>
-<!-- END: Header Section -->
-<!-- BEGIN: Top Stats Bar -->
-<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-purpose="stats-overview">
-<!-- Card 1: Today -->
-<div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-scannr-navy/50 transition-all">
-<div class="relative z-10">
-<p class="text-gray-400 text-sm font-medium">Total Scanned (Today)</p>
-<div class="flex items-end justify-between mt-2">
-<h3 class="text-3xl font-bold text-white">42,891</h3>
-<span class="text-scannr-laneGreen text-xs font-bold bg-scannr-laneGreen/10 px-2 py-1 rounded-md flex items-center">
-<svg class="w-3 h-3 mr-1" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" fill-rule="evenodd"></path></svg>
-                12.4%
-              </span>
-</div>
-<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-<div class="h-full bg-scannr-navy w-3/4 rounded-full"></div>
-</div>
-</div>
-</div>
-<!-- Card 2: Cleared -->
-<div class="glass-card p-5 rounded-2xl group hover:border-scannr-laneGreen/50 transition-all">
-<p class="text-gray-400 text-sm font-medium">Successfully Cleared</p>
-<div class="flex items-end justify-between mt-2">
-<h3 class="text-3xl font-bold text-white">41,202</h3>
-<span class="text-scannr-laneGreen text-xs font-bold bg-scannr-laneGreen/10 px-2 py-1 rounded-md">96.1% Rate</span>
-</div>
-<div class="mt-4 flex items-center gap-1">
-<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
-<div class="w-full bg-scannr-laneGreen h-[40%] rounded-sm opacity-50"></div>
-</div>
-<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
-<div class="w-full bg-scannr-laneGreen h-[60%] rounded-sm opacity-60"></div>
-</div>
-<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
-<div class="w-full bg-scannr-laneGreen h-[90%] rounded-sm opacity-100"></div>
-</div>
-<div class="flex-1 h-6 bg-scannr-laneGreen/20 rounded flex items-end">
-<div class="w-full bg-scannr-laneGreen h-[75%] rounded-sm opacity-80"></div>
-</div>
-</div>
-</div>
-<!-- Card 3: Pending -->
-<div class="glass-card p-5 rounded-2xl group hover:border-scannr-laneAmber/50 transition-all">
-<p class="text-gray-400 text-sm font-medium">Pending Manual Review</p>
-<div class="flex items-end justify-between mt-2">
-<h3 class="text-3xl font-bold text-white">1,644</h3>
-<span class="text-scannr-laneAmber text-xs font-bold bg-scannr-laneAmber/10 px-2 py-1 rounded-md">Warning Threshold</span>
-</div>
-<div class="mt-4">
-<div class="flex justify-between text-[10px] text-gray-500 mb-1">
-<span>Avg Wait: 4.2m</span>
-<span>Target: &lt;5.0m</span>
-</div>
-<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-<div class="h-full bg-scannr-laneAmber w-4/5 rounded-full"></div>
-</div>
-</div>
-</div>
-<!-- Card 4: Seized -->
-<div class="glass-card p-5 rounded-2xl border-scannr-laneRed/20 group hover:border-scannr-laneRed/50 transition-all">
-<p class="text-gray-400 text-sm font-medium">Risk Seizures</p>
-<div class="flex items-end justify-between mt-2">
-<h3 class="text-3xl font-bold text-scannr-laneRed drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]">45</h3>
-<span class="text-scannr-laneRed text-xs font-bold bg-scannr-laneRed/10 px-2 py-1 rounded-md">+4 Today</span>
-</div>
-<div class="mt-4 flex items-center gap-2">
-<div class="animate-pulse w-2 h-2 rounded-full bg-scannr-laneRed neon-glow-red"></div>
-<span class="text-[10px] text-scannr-laneRed font-bold tracking-widest uppercase">Action Required</span>
-</div>
-</div>
-</section>
-<!-- END: Top Stats Bar -->
-<!-- BEGIN: Main Dashboard Content -->
-<section class="grid grid-cols-1 xl:grid-cols-3 gap-6" data-purpose="main-layout-grid">
-<!-- BEGIN: Active Queue Table -->
-<div class="xl:col-span-2 glass-card rounded-2xl flex flex-col overflow-hidden">
-<div class="p-6 border-b border-scannr-border flex justify-between items-center bg-white/5">
-<h2 class="text-lg font-bold text-white">Active Processing Queue</h2>
-<div class="flex items-center gap-3">
-<div class="relative">
-<input class="bg-scannr-dark border-scannr-border text-xs rounded-lg pl-9 pr-4 py-2 focus:ring-scannr-navy focus:border-scannr-navy w-48 transition-all" placeholder="Search manifest..." type="text"/>
-<svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<button class="p-2 bg-white/5 rounded-lg border border-scannr-border hover:bg-white/10 transition-colors">
-<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</div>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="text-[10px] text-gray-500 uppercase tracking-widest border-b border-scannr-border">
-<th class="px-6 py-4 font-semibold">Manifest ID</th>
-<th class="px-6 py-4 font-semibold">Origin</th>
-<th class="px-6 py-4 font-semibold">Status</th>
-<th class="px-6 py-4 font-semibold">Risk Index</th>
-<th class="px-6 py-4 font-semibold">Operator</th>
-<th class="px-6 py-4 font-semibold">Actions</th>
-</tr>
-</thead>
-<tbody class="text-sm divide-y divide-scannr-border/50">
-<!-- Row 1 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-2 h-8 bg-scannr-laneGreen rounded-full"></div>
-<div>
-<p class="font-bold text-white">#QX-8829</p>
-<p class="text-[10px] text-gray-500">Express Freight</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-5 text-gray-300">Singapore (SIN)</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneGreen/10 text-scannr-laneGreen border border-scannr-laneGreen/30 uppercase tracking-wide">In Processing</span>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
-<div class="h-full bg-scannr-laneGreen w-[15%] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-</div>
-<span class="text-xs font-medium text-gray-400">1.2%</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-white/10">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeO5illny6u8POfPYn5g-Y669aIFx6y7aC3a-uVGVndzgpDKmxpGZsfcTu4mV5n81j4MmSCCWhqOCrpPm6MMnMNgxZkBYSU2EqGl4v4uppBEXymgDwYQO1EzhCuRJ9-HoozTKRzYNn5ymRCoHP2mwCfK5SNv4ka9ab5u6Oy5XQyK2PBVT6RcVh0xTLJlY8Pz-eTg3IoLl9CP4FZ99cYdJ1mVhAKjUO-8U4PXdR-3h_3deE1LnMz3a9IJn690laW12EXlCqqDVZLhc"/>
-</div>
-<span class="text-xs text-gray-400">J. Doe</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<button class="text-scannr-navy hover:text-blue-400 font-bold text-xs uppercase tracking-tighter transition-colors">Details</button>
-</td>
-</tr>
-<!-- Row 2 -->
-<tr class="bg-scannr-laneRed/5 hover:bg-scannr-laneRed/10 transition-colors group">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-2 h-8 bg-scannr-laneRed rounded-full shadow-lg shadow-scannr-laneRed/20"></div>
-<div>
-<p class="font-bold text-white text-scannr-laneRed">#QX-7742</p>
-<p class="text-[10px] text-gray-500">High-Value Cargo</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-5 text-gray-300">Rotterdam (RTM)</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneRed/10 text-scannr-laneRed border border-scannr-laneRed/30 uppercase tracking-wide">Interdiction</span>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
-<div class="h-full bg-scannr-laneRed w-[92%] rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div>
-</div>
-<span class="text-xs font-bold text-scannr-laneRed">92.0%</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-scannr-laneRed/30">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa6EhB80qzjA2E76Bv5iNg6SWvr7ihg95qrbYEiBbpYAqfylk3rqSF7RGl7MKZGDU7DtRpNltrvtRUJIyF82VvOldY7-ehRByjRl9PoSCjpEFX_EXaCU0FdF54HOy-i9ZcNbWt5Zpo-Pj7d_WPpuhNQ0wDpqiM1fGtB3cJVDL1gYvW4Bzj6yO7EU5Wsn1VL9YofNSXeOlarrYeWmbvjljgMUWiYuqNMDSHVFINWHuvrRODXeHQPLhemzBFqIQ0cypywtfZuOtoiVI"/>
-</div>
-<span class="text-xs text-gray-400">A. Miller</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<button class="bg-scannr-laneRed text-white px-3 py-1.5 rounded-md font-bold text-[10px] uppercase tracking-tighter hover:bg-red-600 transition-colors shadow-lg shadow-scannr-laneRed/20">Investigate</button>
-</td>
-</tr>
-<!-- Row 3 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-2 h-8 bg-scannr-laneAmber rounded-full"></div>
-<div>
-<p class="font-bold text-white">#QX-9012</p>
-<p class="text-[10px] text-gray-500">Bulk Transit</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-5 text-gray-300">Shanghai (SHA)</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-scannr-laneAmber/10 text-scannr-laneAmber border border-scannr-laneAmber/30 uppercase tracking-wide">Flagged</span>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="flex-1 h-1.5 bg-white/10 rounded-full max-w-[80px]">
-<div class="h-full bg-scannr-laneAmber w-[48%] rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div>
-</div>
-<span class="text-xs font-medium text-gray-400">48.5%</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-2">
-<div class="w-6 h-6 rounded-full bg-gray-700 overflow-hidden border border-white/10">
-<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf9WaNMnPQ2kgARJKIHYswhF3HWmodZsy3XLEsBo1bQ6iKmQRfziR5Mr9qBpTaW6tds3eNsPfi4gNENlq8uE9ztoRdGOMAXn8EgL5Tps_oQfXHlFE3180-MitdMIRn2UhUlclV8vVRWfQrnsHJlFH7Owq7LvOZy8PMDuEvkLqwmRvDhqSdZjwYeyb9OxjhW8D6PkDcUM-tAsxI1g2ApHxqWOXbbHOPaU8uPbmrV6HO9-iH6c1Ob5O6GcGOQeCfEYrBcLJT8mkGaD4"/>
-</div>
-<span class="text-xs text-gray-400">S. Kumar</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<button class="text-scannr-navy hover:text-blue-400 font-bold text-xs uppercase tracking-tighter transition-colors">Details</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="mt-auto p-4 border-t border-scannr-border flex justify-between items-center bg-scannr-dark/30">
-<p class="text-[10px] text-gray-500 font-medium">Showing 3 of 152 items</p>
-<div class="flex items-center gap-2">
-<button class="p-1.5 rounded-md hover:bg-white/10 text-gray-500 disabled:opacity-30" disabled="">←</button>
-<button class="p-1.5 rounded-md hover:bg-white/10 text-gray-300">→</button>
-</div>
-</div>
-</div>
-<!-- END: Active Queue Table -->
-<!-- BEGIN: Right Sidebar Widgets -->
-<div class="space-y-6">
-<!-- Widget: Risk Heatmap Placeholder -->
-<div class="glass-card p-6 rounded-2xl">
-<div class="flex items-center justify-between mb-6">
-<h3 class="font-bold text-white">Risk Heatmap</h3>
-<span class="text-[10px] text-scannr-saffron bg-scannr-saffron/10 px-2 py-1 rounded border border-scannr-saffron/20 font-bold uppercase">Live</span>
-</div>
-<div class="aspect-square bg-gradient-to-br from-scannr-dark to-scannr-navy/20 rounded-xl relative flex items-center justify-center border border-white/5 overflow-hidden group">
-<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
-<!-- Simulated Canvas/Graph -->
-<div class="w-48 h-48 border-4 border-dashed border-white/10 rounded-full flex items-center justify-center relative">
-<div class="w-32 h-32 border-2 border-scannr-laneGreen/30 rounded-full flex items-center justify-center">
-<div class="w-16 h-16 bg-scannr-laneRed/40 rounded-full blur-xl animate-pulse"></div>
-<div class="w-4 h-4 bg-scannr-laneRed rounded-full shadow-[0_0_15px_rgba(239,68,68,1)] z-10"></div>
-</div>
-<div class="absolute top-0 right-0 w-2 h-2 bg-scannr-laneAmber rounded-full shadow-[0_0_10px_#F59E0B]"></div>
-</div>
-<div class="absolute bottom-4 left-4 right-4 flex justify-between text-[10px] text-gray-500 uppercase font-bold tracking-widest">
-<span>Sector A</span>
-<span>Sector B</span>
-</div>
-</div>
-<div class="mt-6 space-y-3">
-<div class="flex items-center justify-between">
-<span class="text-xs text-gray-400">Total Scan Speed</span>
-<span class="text-xs text-white font-bold">1.4s / unit</span>
-</div>
-<div class="w-full bg-white/5 h-1 rounded-full">
-<div class="h-full bg-scannr-saffron w-2/3 rounded-full"></div>
-</div>
-</div>
-</div>
-<!-- Widget: Notifications/Activities -->
-<div class="glass-card p-6 rounded-2xl flex-1">
-<h3 class="font-bold text-white mb-6 flex items-center gap-2">
-<span class="w-2 h-2 bg-scannr-saffron rounded-full"></span>
-              Recent Activity
-             </h3>
-<div class="space-y-6">
-<div class="flex gap-4">
-<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-laneRed/10 flex items-center justify-center flex-shrink-0 text-scannr-laneRed border border-scannr-laneRed/20">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<div>
-<p class="text-xs font-bold text-white">Risk Profile Matched</p>
-<p class="text-[11px] text-gray-400 mt-0.5">Manifest #QX-7742 flagged for prohibited content.</p>
-<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">2 MINS AGO</p>
-</div>
-</div>
-<div class="flex gap-4">
-<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-laneGreen/10 flex items-center justify-center flex-shrink-0 text-scannr-laneGreen border border-scannr-laneGreen/20">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<div>
-<p class="text-xs font-bold text-white">System Calibration</p>
-<p class="text-[11px] text-gray-400 mt-0.5">Sector 4 scanners recalibrated to 99.9% accuracy.</p>
-<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">15 MINS AGO</p>
-</div>
-</div>
-<div class="flex gap-4">
-<div class="mt-1 w-8 h-8 rounded-lg bg-scannr-navy/10 flex items-center justify-center flex-shrink-0 text-scannr-navy border border-scannr-navy/20">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<div>
-<p class="text-xs font-bold text-white">Shift Change</p>
-<p class="text-[11px] text-gray-400 mt-0.5">Operator Sarah King logged in to Console B.</p>
-<p class="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest">1 HOUR AGO</p>
-</div>
-</div>
-</div>
-<button class="w-full mt-8 py-3 bg-white/5 border border-scannr-border rounded-xl text-xs font-bold text-gray-400 uppercase tracking-widest hover:bg-white/10 transition-colors">
-               View All Activity
-             </button>
-</div>
-</div>
-<!-- END: Right Sidebar Widgets -->
-</section>
-<!-- END: Main Dashboard Content -->
-</main>
-</div>
-<!-- BEGIN: Interactive Overlay Placeholder -->
-<div class="fixed bottom-6 right-6" data-purpose="floating-status">
-<div class="bg-scannr-dark/80 backdrop-blur-md border border-scannr-border px-4 py-3 rounded-2xl flex items-center gap-4 shadow-2xl">
-<div class="flex -space-x-2">
-<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden"><img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4k5nrUxXSvgBbVijshW5oHJMdtfB9lulCsWmlRZkqaSM0JHi0PQLQH7mi8K3B7h655T-83TiG3t0sTr-InVE97vg6eveYrSNLEfKqAlkBbk9apdIhPCHOBNISpDtLGoxI6UbtEkmj1723AAlSAEOTZ8Zr0rKB-lFf4zqI9Tp_ont9BDanAu_bvl6ICvXZdWnmBG5GSO5HS5VRQjvCJniO5dpjAS7uG6eAsqUHN8dZN3r185CGcDxp0SalUeEQQZat520zZYrNGj0"/></div>
-<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden"><img alt="" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4F1bdNx9bsIzvA66Yi2Jahsxqc22EfotzDrtrYqjDvn6JY7SSo0BVEbAVUY3rT3jIocxhHQBecw4i1dbnP6emagpvPWjw-plc8vjoXtOpllwUjA4_Fgk34fGa8Jp75pHEBDl-myPQzzZwbAel8xw_P_S72JUDHeSx8mVrLQuxr-Zr7wPdllK1WD_3DoIWDibdGaWNO0wXNl1Zk1a72qpJfkN9scwh7Ov7eCEngonYjtTKCNoym_akWBJt6MmSOQeinS81arn57_I"/></div>
-<div class="w-8 h-8 rounded-full border-2 border-scannr-dark bg-gray-600 overflow-hidden flex items-center justify-center bg-scannr-navy text-[10px] font-bold">+5</div>
-</div>
-<div class="h-8 w-px bg-scannr-border"></div>
-<div class="flex flex-col">
-<span class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Active Operators</span>
-<span class="text-xs text-white font-medium">8 On Duty</span>
-</div>
-<div class="ml-4 w-10 h-10 bg-scannr-saffron rounded-full flex items-center justify-center text-black cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-scannr-saffron/20">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-</div>
-<!-- END: Interactive Overlay Placeholder -->
-<script data-purpose="demo-interactivity">
-    // Mock simple logic for dashboard interactions
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('SCANNR Live Queue Dashboard Initialized');
-      
-      // Auto-update stats every 5 seconds for visual effect
-      setInterval(() => {
-        const seizedCount = document.querySelector('[data-purpose="stats-overview"] h3.text-scannr-laneRed');
-        if(seizedCount) {
-          // Subtle pulse effect already handled by CSS animate-pulse
+        </div>
+        <button onclick="closeOverrideModal()" class="text-gray-500 hover:text-white transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="bg-brand-dark/50 rounded-xl p-4 border border-white/5 flex gap-4 items-start">
+          <div class="w-1 h-full min-h-[40px] bg-brand-neon rounded-full"></div>
+          <div class="flex-1">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Original AI Finding</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-white font-medium">Cleared for Green Lane (Low Risk)</span>
+              <span
+                class="text-xs font-bold bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20">98.2%
+                Confidence</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Based on weight distribution and radiation scan analysis.</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">New Lane
+              Assignment</label>
+            <div class="relative">
+              <select
+                class="w-full bg-brand-card text-white border-white/10 rounded-xl py-3 pl-10 pr-4 focus:ring-brand-accent focus:border-brand-accent appearance-none text-sm">
+                <option value="red">Red Lane (Detailed Inspection)</option>
+                <option value="yellow">Yellow Lane (Document Check)</option>
+                <option value="hold">Hold / Quarantine</option>
+              </select>
+              <div class="absolute left-3 top-3 text-brand-red">
+                <span class="material-symbols-outlined text-lg">warning</span>
+              </div>
+              <div class="absolute right-3 top-3 pointer-events-none text-gray-500">
+                <span class="material-symbols-outlined text-lg">expand_more</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Justification / Reason
+              <span class="text-brand-red">*</span></label>
+            <textarea id="overrideReason" oninput="updateCharCount()"
+              class="w-full bg-brand-card text-white border-white/10 rounded-xl p-3 focus:ring-brand-accent focus:border-brand-accent text-sm min-h-[100px] placeholder-gray-600 resize-none"
+              maxlength="500"
+              placeholder="Enter detailed reason for overriding AI decision (required for audit trail)..."></textarea>
+            <div class="flex justify-between mt-1">
+              <span class="text-[10px] text-gray-500">This action will be logged in the immutable audit ledger.</span>
+              <span id="charCount" class="text-[10px] text-gray-600">0/500</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 bg-black/20 border-t border-white/5 flex items-center justify-end gap-3">
+        <button onclick="closeOverrideModal()"
+          class="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all">Cancel</button>
+        <button
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand-red hover:bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">gavel</span>
+          Confirm Override
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEGIN: Left Sidebar -->
+  <aside class="w-64 border-r border-white/5 flex flex-col h-full bg-brand-dark z-20" data-purpose="sidebar-navigation">
+    <div class="p-6">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-white uppercase">Scannr<span
+            class="text-brand-accent ml-1 text-sm align-top">PRO</span></span>
+      </div>
+    </div>
+    <nav class="flex-1 px-4 space-y-1 mt-4">
+      <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Main Menu</div>
+      <!-- Dashboard Nav -->
+      <a id="nav-dashboard" onclick="switchPage('dashboard')"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 text-white border border-white/5 cursor-pointer">
+        <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        <span class="text-sm font-medium">Dashboard</span>
+      </a>
+      <!-- Live Queue Nav -->
+      <a id="nav-livequeue" onclick="switchPage('livequeue')"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all text-gray-400 hover:text-white group cursor-pointer">
+        <svg class="w-5 h-5 group-hover:text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        <span class="text-sm font-medium">Live Queue</span>
+        <span class="ml-auto bg-brand-red text-[10px] px-1.5 py-0.5 rounded-full text-white font-bold">12</span>
+      </a>
+      <!-- Analytics Nav -->
+      <a id="nav-analytics" onclick="switchPage('analytics')"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all text-gray-400 hover:text-white group cursor-pointer">
+        <svg class="w-5 h-5 group-hover:text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        <span class="text-sm font-medium">Analytics</span>
+      </a>
+      <!-- Operators Nav -->
+      <a id="nav-operators" onclick="switchPage('operators')"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all text-gray-400 hover:text-white group cursor-pointer">
+        <svg class="w-5 h-5 group-hover:text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        <span class="text-sm font-medium">Operators</span>
+      </a>
+      <div class="pt-8 text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">System</div>
+      <!-- Settings Nav -->
+      <a id="nav-settings" onclick="switchPage('settings')"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all text-gray-400 hover:text-white group cursor-pointer">
+        <svg class="w-5 h-5 group-hover:text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+          </path>
+        </svg>
+        <span class="text-sm font-medium">Settings</span>
+      </a>
+    </nav>
+    <div class="p-4 mt-auto">
+      <div class="glass-card p-4 rounded-2xl flex items-center gap-3">
+        <img alt="User Profile" class="w-10 h-10 rounded-full ring-2 ring-brand-accent/20"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjIM-snaEgCDvG7E1n0n2NfHBe4cHpwybztPK1UkRrac9nUIMQjxh1BFH08UoDMntu-icYlzofBoiPqd3x396cH5KS093jtjKucHC2y0up8N3erhf3Kx4bd-Hby-n1ju0OT3WawTzH66varjKtuLPE_d5SHt5gFOuhS7i3dOidzV-6Mi74K2-2ZmHOPtTwV-UNJwCGiCLmzsV38MzDoRc5lwg34PGDILk4N4kIfSJ-5LEzkJ4Ehh_pi2je8XNbnzdDVLXuCU1GWcs" />
+        <div>
+          <div class="text-xs font-bold text-white">David Chen</div>
+          <div class="text-[10px] text-gray-500">Global Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <!-- END: Left Sidebar -->
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 1: Command Center Dashboard                                           -->
+  <!-- ========================================================================== -->
+  <main id="page-dashboard" class="page-view flex-1 overflow-y-auto p-8 relative" data-purpose="main-content-layout">
+    <!-- Header Section -->
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Command Center</h1>
+        <p class="text-sm text-gray-500">Real-time port security &amp; throughput monitoring</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <input
+            class="bg-brand-card border-white/5 rounded-xl px-4 py-2 text-sm w-64 focus:ring-brand-accent focus:border-brand-accent text-white placeholder-gray-600"
+            placeholder="Search container ID..." type="text" />
+        </div>
+        <button id="bellBtn" onclick="toggleNotifPanel()"
+          class="glass-card p-2 rounded-xl text-gray-400 hover:text-white transition-colors relative">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          <span class="absolute -top-1 -right-1 w-3 h-3 bg-brand-red rounded-full animate-pulse"></span>
+        </button>
+      </div>
+    </header>
+    <!-- Dashboard Grid Layout -->
+    <div class="grid grid-cols-12 gap-6">
+      <!-- BEGIN: Risk Heatmap (Central Feature) -->
+      <section class="col-span-8 glass-card rounded-3xl p-6 relative min-h-[500px] flex flex-col"
+        data-purpose="risk-heatmap-container">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-lg font-semibold text-white">Risk Heatmap</h2>
+            <div class="flex items-center gap-2 text-xs text-gray-500">
+              <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              All Scanners Active (42 Nodes)
+            </div>
+          </div>
+          <div class="flex bg-brand-dark/50 p-1 rounded-lg border border-white/5">
+            <button
+              class="px-3 py-1 text-xs font-medium bg-brand-accent text-white rounded-md shadow-sm">Real-time</button>
+            <button class="px-3 py-1 text-xs font-medium text-gray-500 hover:text-white transition-colors">24h
+              Forecast</button>
+          </div>
+        </div>
+        <!-- Hexagonal Grid Implementation -->
+        <div class="flex-1 relative overflow-hidden flex items-center justify-center">
+          <div class="hexagon-grid" data-purpose="hexagon-risk-visualization" id="heatmapGrid"></div>
+          <!-- Tooltip / Overlay -->
+          <div
+            class="absolute bottom-6 right-6 glass-card p-4 rounded-2xl border-l-4 border-brand-accent w-48 shadow-2xl">
+            <div class="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Current Sector</div>
+            <div class="text-sm font-bold text-white mb-2">Pier 4 - Zone B</div>
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Risk Score</span>
+                <span class="text-brand-neon font-bold">14.2%</span>
+              </div>
+              <div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                <div class="bg-brand-neon h-full w-[14%]"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Legend -->
+          <div class="absolute bottom-6 left-6 flex flex-col gap-2 text-[10px] font-medium text-gray-500">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 hex-neon rounded-sm"></span> Critical Alert</div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 hex-blue-bright rounded-sm"></span> High Density
+            </div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 hex-blue-light rounded-sm"></span> Low Risk</div>
+          </div>
+        </div>
+      </section>
+      <!-- END: Risk Heatmap -->
+      <!-- BEGIN: Side Data Panels -->
+      <aside class="col-span-4 space-y-6">
+        <!-- Throughput Chart -->
+        <article class="glass-card rounded-3xl p-6" data-purpose="throughput-card">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white">Live Throughput</h3>
+            <span class="text-[10px] text-brand-neon bg-brand-neon/10 px-2 py-0.5 rounded-full">+4.2%</span>
+          </div>
+          <div class="h-32 w-full relative">
+            <canvas class="w-full h-full" id="throughputChart"></canvas>
+          </div>
+          <div class="mt-4 flex justify-between items-end">
+            <div>
+              <div id="throughputCounter" class="text-2xl font-bold text-white">4,812</div>
+              <div class="text-[10px] text-gray-500">Containers / Hour</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-gray-400">Peak: 14:00</div>
+              <div class="text-xs text-gray-400">Avg: 3,920</div>
+            </div>
+          </div>
+        </article>
+        <!-- System Health -->
+        <article class="glass-card rounded-3xl p-6" data-purpose="system-health-card">
+          <h3 class="text-sm font-semibold text-white mb-4">System Health</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-neon" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">AI Inference Accuracy</span>
+              </div>
+              <span class="text-xs font-bold text-white">99.8%</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-neon" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Cloud Sync Status</span>
+              </div>
+              <span class="text-[10px] text-green-400 font-bold uppercase tracking-widest">Active</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-neon" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Uptime</span>
+              </div>
+              <span class="text-xs font-bold text-white">124d 14h</span>
+            </div>
+          </div>
+        </article>
+        <!-- Active Alerts -->
+        <article class="glass-card rounded-3xl p-6" data-purpose="alerts-card">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white">Active Alerts</h3>
+            <button class="text-[10px] text-brand-accent hover:underline">View All</button>
+          </div>
+          <div class="space-y-3">
+            <!-- Alert Item 1 -->
+            <div onclick="switchPage('detail')"
+              class="p-3 bg-brand-red/10 border border-brand-red/20 rounded-xl flex items-center justify-between cursor-pointer hover:bg-brand-red/20 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-brand-red animate-ping"></div>
+                <div>
+                  <div class="text-[11px] font-bold text-white">Suspect Radiation</div>
+                  <div class="text-[10px] text-gray-500">ID: CNTR-9921-A</div>
+                </div>
+              </div>
+              <span class="text-[9px] font-black bg-brand-red text-white px-1.5 py-0.5 rounded">CRITICAL</span>
+            </div>
+            <!-- Alert Item 2 -->
+            <div onclick="switchPage('detail')"
+              class="p-3 bg-brand-amber/10 border border-brand-amber/20 rounded-xl flex items-center justify-between cursor-pointer hover:bg-brand-amber/20 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-brand-amber"></div>
+                <div>
+                  <div class="text-[11px] font-bold text-white">Weight Discrepancy</div>
+                  <div class="text-[10px] text-gray-500">ID: MSK-4002-X</div>
+                </div>
+              </div>
+              <span class="text-[9px] font-black bg-brand-amber text-black px-1.5 py-0.5 rounded uppercase">Amber</span>
+            </div>
+          </div>
+        </article>
+      </aside>
+      <!-- END: Side Data Panels -->
+    </div>
+    <!-- Predictive Analytics Banner (Bottom) -->
+    <footer class="mt-6 glass-card rounded-3xl p-4 flex items-center justify-between overflow-hidden"
+      data-purpose="footer-analytics">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Predictive Risk:</span>
+          <span class="text-2xl font-black text-white">56%</span>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <p class="text-xs text-gray-400 max-w-sm">
+          Expected decline in risk density due to scheduled patrol increase in Zone B starting 18:00.
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <div class="flex items-center h-4 space-x-1">
+          <div class="w-1 h-3 bg-brand-accent rounded-full opacity-20"></div>
+          <div class="w-1 h-4 bg-brand-accent rounded-full opacity-30"></div>
+          <div class="w-1 h-6 bg-brand-accent rounded-full opacity-50"></div>
+          <div class="w-1 h-8 bg-brand-accent rounded-full"></div>
+          <div class="w-1 h-6 bg-brand-accent rounded-full opacity-50"></div>
+          <div class="w-1 h-4 bg-brand-accent rounded-full opacity-30"></div>
+          <div class="w-1 h-3 bg-brand-accent rounded-full opacity-20"></div>
+        </div>
+        <button onclick="generateReport()"
+          class="bg-brand-accent hover:bg-blue-600 text-white text-[10px] font-bold py-2 px-4 rounded-xl transition-all uppercase tracking-wider">
+          Generate Report
+        </button>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 2: Live Queue                                                          -->
+  <!-- ========================================================================== -->
+  <main id="page-livequeue" class="page-view hidden flex-1 overflow-y-auto p-8 relative flex flex-col h-full"
+    data-purpose="livequeue-content-layout">
+    <header class="flex items-center justify-between mb-8 shrink-0">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Live Queue</h1>
+        <p class="text-sm text-gray-500">Real-time container processing &amp; risk assessment</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="flex items-center gap-2 px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent rounded-xl text-xs font-bold uppercase tracking-wider transition-colors border border-brand-accent/20">
+          <span class="material-symbols-outlined text-sm">download</span>
+          Export Log
+        </button>
+      </div>
+    </header>
+    <!-- Stats Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 shrink-0">
+      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Total Scanned</span>
+          <span class="material-symbols-outlined text-gray-500 text-sm">qr_code_scanner</span>
+        </div>
+        <div class="flex items-baseline gap-2 mb-2">
+          <h3 class="text-2xl font-bold text-white">12,482</h3>
+          <span class="text-xs text-green-400 font-medium flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 12%
+          </span>
+        </div>
+        <div class="h-8 w-full">
+          <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+            <path d="M0 15 Q 10 5, 20 10 T 40 12 T 60 5 T 80 15 T 100 8" fill="none" stroke="#3B82F6" stroke-width="2">
+            </path>
+            <path d="M0 15 Q 10 5, 20 10 T 40 12 T 60 5 T 80 15 T 100 8 V 20 H 0 Z" fill="rgba(59, 130, 246, 0.1)"
+              stroke="none"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Pending Review</span>
+          <span class="material-symbols-outlined text-gray-500 text-sm">pending_actions</span>
+        </div>
+        <div class="flex items-baseline gap-2 mb-2">
+          <h3 class="text-2xl font-bold text-brand-neon glow-text-neon">42</h3>
+          <span class="text-xs text-brand-amber font-medium flex items-center gap-0.5">
+            +8 new
+          </span>
+        </div>
+        <div class="h-8 w-full">
+          <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+            <path d="M0 18 Q 20 15, 40 10 T 60 14 T 80 5 T 100 2" fill="none" stroke="#00F2FF" stroke-width="2">
+            </path>
+            <path d="M0 18 Q 20 15, 40 10 T 60 14 T 80 5 T 100 2 V 20 H 0 Z" fill="rgba(0, 242, 255, 0.1)"
+              stroke="none"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Risk Seizures</span>
+          <span class="material-symbols-outlined text-gray-500 text-sm">gavel</span>
+        </div>
+        <div class="flex items-baseline gap-2 mb-2">
+          <h3 class="text-2xl font-bold text-brand-red">9</h3>
+          <span class="text-xs text-brand-red font-medium flex items-center gap-0.5">
+            2 Critical
+          </span>
+        </div>
+        <div class="h-8 w-full">
+          <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+            <path d="M0 18 L 20 18 L 30 10 L 40 18 L 60 18 L 70 5 L 80 18 L 100 18" fill="none" stroke="#EF4444"
+              stroke-width="2"></path>
+            <path d="M0 18 L 20 18 L 30 10 L 40 18 L 60 18 L 70 5 L 80 18 L 100 18 V 20 H 0 Z"
+              fill="rgba(239, 68, 68, 0.1)" stroke="none"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Avg Process Time</span>
+          <span class="material-symbols-outlined text-gray-500 text-sm">timer</span>
+        </div>
+        <div class="flex items-baseline gap-2 mb-2">
+          <h3 class="text-2xl font-bold text-white">45s</h3>
+          <span class="text-xs text-green-400 font-medium flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-[10px]">arrow_downward</span> 2.5s
+          </span>
+        </div>
+        <div class="h-8 w-full">
+          <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+            <path d="M0 10 Q 25 12, 50 10 T 100 10" fill="none" stroke="#10B981" stroke-dasharray="4 2"
+              stroke-width="2"></path>
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- Container Queue Table -->
+    <section class="glass-card rounded-3xl flex flex-col flex-1 overflow-hidden min-h-[500px]">
+      <div class="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4 flex-1">
+          <div class="relative w-full max-w-md">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-500 text-lg">search</span>
+            </div>
+            <input id="queueSearch" oninput="filterQueueTable()"
+              class="bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm w-full focus:ring-1 focus:ring-brand-accent focus:border-brand-accent text-white placeholder-gray-600 transition-all"
+              placeholder="Search container ID, origin..." type="text" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          <span class="text-xs font-bold text-gray-500 uppercase mr-2 whitespace-nowrap">Risk Filter:</span>
+          <button onclick="filterByRisk('all')" data-level="all"
+            class="risk-filter-btn px-3 py-1.5 rounded-lg bg-brand-accent text-white text-xs font-medium transition-all shadow-[0_0_10px_rgba(59,130,246,0.3)]">All</button>
+          <button onclick="filterByRisk('high')" data-level="high"
+            class="risk-filter-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-brand-red text-xs font-medium transition-all border border-brand-red/20 hover:border-brand-red/50">High</button>
+          <button onclick="filterByRisk('medium')" data-level="medium"
+            class="risk-filter-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-brand-amber text-xs font-medium transition-all border border-brand-amber/20 hover:border-brand-amber/50">Medium</button>
+          <button onclick="filterByRisk('low')" data-level="low"
+            class="risk-filter-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-green-400 text-xs font-medium transition-all border border-green-400/20 hover:border-green-400/50">Low</button>
+        </div>
+      </div>
+      <div class="overflow-auto flex-1">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-white/5 sticky top-0 z-10 backdrop-blur-md">
+            <tr>
+              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">
+                Container ID</th>
+              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">Origin
+              </th>
+              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">Status
+              </th>
+              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10 w-1/4">
+                Risk Index</th>
+              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">Operator
+              </th>
+              <th
+                class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10 text-right">
+                Action</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody" class="divide-y divide-white/5">
+            <!-- Row 1: Flagged - Critical -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">MSKU-908122-4</span>
+                  <span class="text-[10px] text-gray-500">Dry Van 40ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇨🇳</span>
+                  <span class="text-sm text-gray-300">Shanghai, CN</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="high"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-red/10 text-brand-red border border-brand-red/20 glow-pill-red">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse"></span>
+                  Flagged
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-brand-red font-bold">94% Critical</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                      style="width: 94%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    JD</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-brand-red hover:bg-red-600 text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all shadow-lg shadow-red-900/20"
+                  onclick="switchPage('detail')">
+                  Investigate
+                </button>
+              </td>
+            </tr>
+            <!-- Row 2: Live Scan -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">CSNU-442109-1</span>
+                  <span class="text-[10px] text-gray-500">Reefer 20ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇸🇬</span>
+                  <span class="text-sm text-gray-300">Singapore, SG</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="medium"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-neon/10 text-brand-neon border border-brand-neon/20 glow-text-neon">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-neon animate-ping"></span>
+                  Live Scan
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-brand-neon font-bold">Processing...</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-brand-neon h-full rounded-full animate-[shimmer_2s_infinite]"
+                      style="width: 45%; background-image: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);">
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    AI</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all border border-white/10">
+                  Details
+                </button>
+              </td>
+            </tr>
+            <!-- Row 3: Review -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">TRHU-110293-8</span>
+                  <span class="text-[10px] text-gray-500">Standard 40ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇳🇱</span>
+                  <span class="text-sm text-gray-300">Rotterdam, NL</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="medium"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-amber/10 text-brand-amber border border-brand-amber/20 glow-pill-amber">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-amber"></span>
+                  Review
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-brand-amber font-bold">58% Elevated</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-brand-amber h-full rounded-full" style="width: 58%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-pink-700 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    JS</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-brand-amber hover:bg-amber-600 text-black text-xs font-bold py-1.5 px-4 rounded-lg transition-all shadow-lg shadow-amber-900/20"
+                  onclick="switchPage('detail')">
+                  Investigate
+                </button>
+              </td>
+            </tr>
+            <!-- Row 4: Cleared -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-gray-400 group-hover:text-white transition-colors">CMAU-554102-3</span>
+                  <span class="text-[10px] text-gray-600">Tanker 20ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇧🇷</span>
+                  <span class="text-sm text-gray-400">Santos, BR</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="low"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20 glow-pill-green">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  Cleared
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-green-500 font-bold">12% Low</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-green-500 h-full rounded-full" style="width: 12%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    AI</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all border border-white/10">
+                  Archive
+                </button>
+              </td>
+            </tr>
+            <!-- Row 5: Cleared -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-gray-400 group-hover:text-white transition-colors">MAEU-102938-7</span>
+                  <span class="text-[10px] text-gray-600">Dry Van 40ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇺🇸</span>
+                  <span class="text-sm text-gray-400">Los Angeles, US</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="low"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20 glow-pill-green">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  Cleared
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-green-500 font-bold">5% Low</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-green-500 h-full rounded-full" style="width: 5%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    AI</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all border border-white/10">
+                  Archive
+                </button>
+              </td>
+            </tr>
+            <!-- Row 6: Flagged - Critical -->
+            <tr class="hover:bg-white/5 transition-colors group">
+              <td class="p-4">
+                <div class="flex flex-col">
+                  <span
+                    class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">HLCU-728192-0</span>
+                  <span class="text-[10px] text-gray-500">Open Top 20ft</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🇷🇺</span>
+                  <span class="text-sm text-gray-300">St. Petersburg, RU</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span data-risk="high"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-red/10 text-brand-red border border-brand-red/20 glow-pill-red">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse"></span>
+                  Flagged
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="w-full max-w-[200px]">
+                  <div class="flex justify-between text-[10px] mb-1">
+                    <span class="text-brand-red font-bold">88% Critical</span>
+                  </div>
+                  <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                      style="width: 88%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex -space-x-2 overflow-hidden">
+                  <div
+                    class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">
+                    MK</div>
+                </div>
+              </td>
+              <td class="p-4 text-right">
+                <button
+                  class="bg-brand-red hover:bg-red-600 text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all shadow-lg shadow-red-900/20"
+                  onclick="switchPage('detail')">
+                  Investigate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="p-4 border-t border-white/5 flex items-center justify-between">
+        <div class="text-xs text-gray-500">
+          Showing <span class="text-white font-bold">1-6</span> of <span class="text-white font-bold">42</span> active
+          containers
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="p-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white disabled:opacity-50">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          <button
+            class="p-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white disabled:opacity-50">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 3: Container Risk Detail                                               -->
+  <!-- ========================================================================== -->
+  <main id="page-detail" class="page-view hidden flex-1 overflow-y-auto p-8 relative flex flex-col h-full"
+    data-purpose="detail-content-layout">
+    <header class="flex items-center justify-between mb-8 shrink-0">
+      <div>
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+          <span class="hover:text-white cursor-pointer" onclick="switchPage('livequeue')">Live Queue</span>
+          <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+          <span class="text-brand-accent font-medium">Investigation Detail</span>
+        </div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">CNTR-9921-A</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div
+          class="px-3 py-1 bg-brand-red/10 border border-brand-red/20 text-brand-red rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
+          High Risk Detected
+        </div>
+        <div class="h-8 w-px bg-white/10 mx-2"></div>
+        <button class="glass-card p-2 rounded-xl text-gray-400 hover:text-white transition-colors">
+          <span class="material-symbols-outlined">print</span>
+        </button>
+        <button class="glass-card p-2 rounded-xl text-gray-400 hover:text-white transition-colors">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+      </div>
+    </header>
+    <div class="grid grid-cols-12 gap-6 flex-1 min-h-0">
+      <section class="col-span-8 flex flex-col gap-6">
+        <!-- X-Ray / Grad-CAM Viewer -->
+        <div class="glass-card rounded-3xl p-1 relative overflow-hidden flex-1 min-h-[400px] flex flex-col">
+          <div class="absolute top-4 left-4 z-10 flex gap-2">
+            <span
+              class="bg-black/60 backdrop-blur text-white text-[10px] px-2 py-1 rounded border border-white/10 font-mono">CAM_04_SIDE_A</span>
+            <span
+              class="bg-brand-neon/20 backdrop-blur text-brand-neon text-[10px] px-2 py-1 rounded border border-brand-neon/30 font-bold">X-RAY
+              MODE: ACTIVE</span>
+          </div>
+          <div class="relative w-full h-full rounded-[20px] overflow-hidden bg-black group">
+            <div
+              class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2940&auto=format&fit=crop')] bg-cover bg-center grayscale opacity-40 mix-blend-luminosity">
+            </div>
+            <div class="absolute inset-0 grad-cam-overlay opacity-80"></div>
+            <div class="scan-line"></div>
+            <div
+              class="absolute top-[55%] left-[65%] w-[15%] h-[15%] border-2 border-brand-red shadow-[0_0_20px_rgba(239,68,68,0.5)] rounded-sm flex items-start justify-end p-1">
+              <div class="bg-brand-red text-white text-[9px] font-bold px-1">ANOMALY: 98%</div>
+            </div>
+            <div
+              class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]">
+            </div>
+          </div>
+          <div
+            class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 rounded-full flex items-center gap-6">
+            <button class="text-white hover:text-brand-neon transition-colors"><span
+                class="material-symbols-outlined text-xl">zoom_in</span></button>
+            <button class="text-white hover:text-brand-neon transition-colors"><span
+                class="material-symbols-outlined text-xl">zoom_out</span></button>
+            <div class="w-px h-4 bg-white/20"></div>
+            <button class="text-brand-neon transition-colors"><span
+                class="material-symbols-outlined text-xl">layers</span></button>
+            <button class="text-gray-400 hover:text-white transition-colors"><span
+                class="material-symbols-outlined text-xl">contrast</span></button>
+          </div>
+        </div>
+        <!-- Cargo Info Cards -->
+        <div class="grid grid-cols-3 gap-6 h-32 shrink-0">
+          <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Origin Port</div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🇨🇳</div>
+              <div>
+                <div class="text-sm font-bold text-white">Ningbo-Zhoushan</div>
+                <div class="text-xs text-brand-amber">High Risk Region</div>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Declared Cargo</div>
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-gray-400 text-2xl">inventory_2</span>
+              <div>
+                <div class="text-sm font-bold text-white">Electronics Parts</div>
+                <div class="text-xs text-gray-400">HS Code: 8542.31</div>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Consignee</div>
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-gray-400 text-2xl">domain</span>
+              <div>
+                <div class="text-sm font-bold text-white">Global Logistics Ltd</div>
+                <div class="text-xs text-green-400">Verified Entity</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Right Sidebar: Risk Score + Actions -->
+      <aside class="col-span-4 flex flex-col gap-6">
+        <!-- Overall Risk Score Gauge -->
+        <div
+          class="glass-card rounded-3xl p-6 flex flex-col items-center justify-center relative bg-gradient-to-b from-brand-red/5 to-transparent">
+          <h3 class="absolute top-6 left-6 text-sm font-bold text-gray-400 uppercase tracking-wider">Overall Risk Score
+          </h3>
+          <div class="relative w-full mt-6">
+            <svg class="circular-chart" viewBox="0 0 36 36">
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831">
+              </path>
+              <path class="circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                stroke="url(#gradient-detail)" stroke-dasharray="84, 100"></path>
+              <defs>
+                <linearGradient id="gradient-detail" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" stop-color="#F59E0B"></stop>
+                  <stop offset="100%" stop-color="#EF4444"></stop>
+                </linearGradient>
+              </defs>
+              <text class="percentage" x="18" y="20.35">84</text>
+            </svg>
+            <div class="absolute bottom-0 w-full text-center -mb-2">
+              <div
+                class="inline-block px-3 py-1 rounded-full bg-brand-red text-white text-xs font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                Critical</div>
+            </div>
+          </div>
+        </div>
+        <!-- Risk Factors Breakdown -->
+        <div class="glass-card rounded-3xl p-6 flex-1 flex flex-col">
+          <h3 class="text-sm font-bold text-white mb-4">Risk Factors Breakdown</h3>
+          <div class="space-y-4 overflow-y-auto pr-2 flex-1">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-medium text-gray-300">Weight Discrepancy</span>
+                <span class="text-xs font-bold text-brand-red">High (12%)</span>
+              </div>
+              <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-brand-red h-full w-[85%] shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-medium text-gray-300">Origin Reputation</span>
+                <span class="text-xs font-bold text-brand-amber">Medium</span>
+              </div>
+              <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-brand-amber h-full w-[60%]"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-medium text-gray-300">Blockchain Trust</span>
+                <span class="text-xs font-bold text-brand-red">Low</span>
+              </div>
+              <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-brand-red h-full w-[75%]"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-medium text-gray-300">AI Object Detection</span>
+                <span class="text-xs font-bold text-brand-red">Suspect Shape</span>
+              </div>
+              <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-brand-red h-full w-[92%] shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-1">Found anomalous density in sector A4 matching contraband
+                profile.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Operator Actions -->
+        <div class="glass-card rounded-3xl p-6">
+          <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Operator Actions</h3>
+          <div class="space-y-3">
+            <button onclick="openOverrideModal()"
+              class="w-full group relative flex items-center justify-center gap-3 py-3 rounded-xl border border-brand-red/30 bg-brand-red/10 hover:bg-brand-red text-brand-red hover:text-white transition-all duration-300 overflow-hidden">
+              <div
+                class="absolute inset-0 bg-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
+              <span class="material-symbols-outlined relative z-10">gavel</span>
+              <span class="text-sm font-bold uppercase tracking-wider relative z-10">Seize Cargo</span>
+            </button>
+            <button onclick="holdForInspection()"
+              class="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-brand-amber/30 bg-brand-amber/10 hover:bg-brand-amber/20 text-brand-amber transition-all">
+              <span class="material-symbols-outlined">front_hand</span>
+              <span class="text-sm font-bold uppercase tracking-wider">Hold for Inspection</span>
+            </button>
+            <button
+              class="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-green-500/30 bg-green-500/10 hover:bg-green-500/20 text-green-500 transition-all opacity-50 cursor-not-allowed"
+              disabled>
+              <span class="material-symbols-outlined">check_circle</span>
+              <span class="text-sm font-bold uppercase tracking-wider">Approve &amp; Release</span>
+            </button>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <img alt="Operator" class="w-6 h-6 rounded-full"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjIM-snaEgCDvG7E1n0n2NfHBe4cHpwybztPK1UkRrac9nUIMQjxh1BFH08UoDMntu-icYlzofBoiPqd3x396cH5KS093jtjKucHC2y0up8N3erhf3Kx4bd-Hby-n1ju0OT3WawTzH66varjKtuLPE_d5SHt5gFOuhS7i3dOidzV-6Mi74K2-2ZmHOPtTwV-UNJwCGiCLmzsV38MzDoRc5lwg34PGDILk4N4kIfSJ-5LEzkJ4Ehh_pi2je8XNbnzdDVLXuCU1GWcs" />
+              <span class="text-[10px] text-gray-400">Assigned: <span class="text-white">D. Chen</span></span>
+            </div>
+            <span class="text-[10px] text-gray-500">Log ID: #88219</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 4: Analytics                                                           -->
+  <!-- ========================================================================== -->
+  <main id="page-analytics" class="page-view hidden flex-1 overflow-y-auto p-8 relative"
+    data-purpose="analytics-content">
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Analytics</h1>
+        <p class="text-sm text-gray-500">Historical performance &amp; detection metrics</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <select class="bg-brand-card border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:ring-brand-accent">
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+          <option>Last 90 Days</option>
+        </select>
+      </div>
+    </header>
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-4 gap-6 mb-8">
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Scans</div>
+        <div class="text-3xl font-bold text-white">87,429</div>
+        <div class="text-xs text-green-400 mt-1">↑ 18% vs last period</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Detection Rate</div>
+        <div class="text-3xl font-bold text-brand-neon">94.2%</div>
+        <div class="text-xs text-green-400 mt-1">↑ 2.1% improvement</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Avg Clearance</div>
+        <div class="text-3xl font-bold text-white">12min</div>
+        <div class="text-xs text-green-400 mt-1">↓ 3min faster</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">False Positive Rate</div>
+        <div class="text-3xl font-bold text-brand-amber">1.8%</div>
+        <div class="text-xs text-green-400 mt-1">↓ 0.4% reduction</div>
+      </div>
+    </div>
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Risk Distribution -->
+      <div class="col-span-4 glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-semibold text-white mb-6">Lane Distribution</h3>
+        <div class="flex items-center justify-center mb-6">
+          <canvas id="laneChart" width="200" height="200"></canvas>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span><span
+                class="text-xs text-gray-300">Green Lane</span></div><span
+              class="text-xs font-bold text-white">72%</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-brand-amber"></span><span
+                class="text-xs text-gray-300">Yellow Lane</span></div><span
+              class="text-xs font-bold text-white">18%</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-brand-red"></span><span
+                class="text-xs text-gray-300">Red Lane</span></div><span class="text-xs font-bold text-white">10%</span>
+          </div>
+        </div>
+      </div>
+      <!-- Weekly Volume -->
+      <div class="col-span-8 glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-semibold text-white mb-6">Weekly Scan Volume</h3>
+        <div class="h-56 w-full relative">
+          <canvas id="weeklyChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+    </div>
+    <!-- Top Flagged Origins -->
+    <div class="glass-card rounded-3xl p-6 mt-6">
+      <h3 class="text-sm font-semibold text-white mb-4">Top Flagged Origins</h3>
+      <table class="w-full text-left">
+        <thead>
+          <tr>
+            <th class="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Country</th>
+            <th class="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Flags</th>
+            <th class="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Avg Risk</th>
+            <th class="pb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Trend</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          <tr>
+            <td class="py-3 text-sm text-white">🇨🇳 China</td>
+            <td class="py-3 text-sm text-brand-red font-bold">142</td>
+            <td class="py-3 text-sm text-white">72</td>
+            <td class="py-3 text-xs text-red-400">↑ 12%</td>
+          </tr>
+          <tr>
+            <td class="py-3 text-sm text-white">🇷🇺 Russia</td>
+            <td class="py-3 text-sm text-brand-red font-bold">89</td>
+            <td class="py-3 text-sm text-white">68</td>
+            <td class="py-3 text-xs text-red-400">↑ 8%</td>
+          </tr>
+          <tr>
+            <td class="py-3 text-sm text-white">🇳🇬 Nigeria</td>
+            <td class="py-3 text-sm text-brand-amber font-bold">54</td>
+            <td class="py-3 text-sm text-white">55</td>
+            <td class="py-3 text-xs text-green-400">↓ 3%</td>
+          </tr>
+          <tr>
+            <td class="py-3 text-sm text-white">🇵🇰 Pakistan</td>
+            <td class="py-3 text-sm text-brand-amber font-bold">41</td>
+            <td class="py-3 text-sm text-white">48</td>
+            <td class="py-3 text-xs text-gray-400">— 0%</td>
+          </tr>
+          <tr>
+            <td class="py-3 text-sm text-white">🇲🇲 Myanmar</td>
+            <td class="py-3 text-sm text-brand-amber font-bold">37</td>
+            <td class="py-3 text-sm text-white">61</td>
+            <td class="py-3 text-xs text-red-400">↑ 5%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 5: Operators                                                           -->
+  <!-- ========================================================================== -->
+  <main id="page-operators" class="page-view hidden flex-1 overflow-y-auto p-8 relative"
+    data-purpose="operators-content">
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Operators</h1>
+        <p class="text-sm text-gray-500">Team roster &amp; shift management</p>
+      </div>
+      <button
+        class="flex items-center gap-2 px-4 py-2 bg-brand-accent hover:bg-blue-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors">
+        <span class="material-symbols-outlined text-sm">person_add</span> Add Operator
+      </button>
+    </header>
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-6 mb-8">
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">On Shift</div>
+        <div class="text-3xl font-bold text-green-400">8</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Off Duty</div>
+        <div class="text-3xl font-bold text-gray-500">4</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Avg Cases / Day</div>
+        <div class="text-3xl font-bold text-white">24</div>
+      </div>
+    </div>
+    <!-- Roster Table -->
+    <div class="glass-card rounded-3xl overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-white/5">
+          <tr>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Operator</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Role</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Assigned</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Accuracy</th>
+            <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Shift</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          <tr class="hover:bg-white/5">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  DC</div><span class="text-sm text-white font-medium">David Chen</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-300">Global Admin</td>
+            <td class="p-4"><span class="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">On
+                Shift</span></td>
+            <td class="p-4 text-sm text-white font-bold">6</td>
+            <td class="p-4 text-sm text-brand-neon">98.4%</td>
+            <td class="p-4 text-sm text-gray-400 text-right">06:00 – 14:00</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  JS</div><span class="text-sm text-white font-medium">Jessica Santos</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-300">Sr. Inspector</td>
+            <td class="p-4"><span class="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">On
+                Shift</span></td>
+            <td class="p-4 text-sm text-white font-bold">4</td>
+            <td class="p-4 text-sm text-brand-neon">96.1%</td>
+            <td class="p-4 text-sm text-gray-400 text-right">06:00 – 14:00</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  JD</div><span class="text-sm text-white font-medium">James Donovan</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-300">Inspector</td>
+            <td class="p-4"><span class="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">On
+                Shift</span></td>
+            <td class="p-4 text-sm text-white font-bold">3</td>
+            <td class="p-4 text-sm text-brand-neon">94.7%</td>
+            <td class="p-4 text-sm text-gray-400 text-right">06:00 – 14:00</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  MK</div><span class="text-sm text-white font-medium">Maria Kovacs</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-300">Inspector</td>
+            <td class="p-4"><span class="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">On
+                Shift</span></td>
+            <td class="p-4 text-sm text-white font-bold">5</td>
+            <td class="p-4 text-sm text-brand-neon">97.2%</td>
+            <td class="p-4 text-sm text-gray-400 text-right">06:00 – 14:00</td>
+          </tr>
+          <tr class="hover:bg-white/5 opacity-50">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  AL</div><span class="text-sm text-gray-400 font-medium">Arjun Lahiri</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-500">Sr. Inspector</td>
+            <td class="p-4"><span class="text-xs font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Off
+                Duty</span></td>
+            <td class="p-4 text-sm text-gray-500">—</td>
+            <td class="p-4 text-sm text-gray-500">95.8%</td>
+            <td class="p-4 text-sm text-gray-500 text-right">14:00 – 22:00</td>
+          </tr>
+          <tr class="hover:bg-white/5 opacity-50">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center text-white text-[10px] font-bold">
+                  RW</div><span class="text-sm text-gray-400 font-medium">Rachel Wang</span>
+              </div>
+            </td>
+            <td class="p-4 text-sm text-gray-500">Inspector</td>
+            <td class="p-4"><span class="text-xs font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Off
+                Duty</span></td>
+            <td class="p-4 text-sm text-gray-500">—</td>
+            <td class="p-4 text-sm text-gray-500">93.1%</td>
+            <td class="p-4 text-sm text-gray-500 text-right">14:00 – 22:00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- PAGE 6: Settings                                                            -->
+  <!-- ========================================================================== -->
+  <main id="page-settings" class="page-view hidden flex-1 overflow-y-auto p-8 relative" data-purpose="settings-content">
+    <header class="mb-8">
+      <h1 class="text-2xl font-bold text-white">Settings</h1>
+      <p class="text-sm text-gray-500">System configuration &amp; preferences</p>
+    </header>
+    <div class="grid grid-cols-2 gap-6">
+      <!-- AI Thresholds -->
+      <div class="glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-bold text-white mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-accent text-lg">psychology</span> AI Confidence Thresholds
+        </h3>
+        <div class="space-y-5">
+          <div>
+            <div class="flex justify-between mb-2"><label class="text-xs text-gray-300">Auto-Flag Threshold</label><span
+                class="text-xs font-bold text-brand-neon">85%</span></div>
+            <input type="range" min="50" max="100" value="85"
+              class="w-full accent-brand-accent h-1 bg-white/10 rounded-full appearance-none cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between mb-2"><label class="text-xs text-gray-300">Alert Threshold</label><span
+                class="text-xs font-bold text-brand-amber">70%</span></div>
+            <input type="range" min="50" max="100" value="70"
+              class="w-full accent-brand-amber h-1 bg-white/10 rounded-full appearance-none cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between mb-2"><label class="text-xs text-gray-300">Green Lane Max
+                Score</label><span class="text-xs font-bold text-green-400">20</span></div>
+            <input type="range" min="5" max="50" value="20"
+              class="w-full accent-green-500 h-1 bg-white/10 rounded-full appearance-none cursor-pointer">
+          </div>
+        </div>
+      </div>
+      <!-- Feature Toggles -->
+      <div class="glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-bold text-white mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-accent text-lg">toggle_on</span> System Features
+        </h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <div>
+              <div class="text-sm text-white font-medium">Auto-Release Green Lane</div>
+              <div class="text-[10px] text-gray-500">Containers scoring &lt;20 auto-cleared</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked
+                class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <div>
+              <div class="text-sm text-white font-medium">Email Alerts</div>
+              <div class="text-[10px] text-gray-500">Critical risk alerts to admin inbox</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked
+                class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <div>
+              <div class="text-sm text-white font-medium">Blockchain Verification</div>
+              <div class="text-[10px] text-gray-500">Hyperledger trust check for all imports</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked
+                class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <div>
+              <div class="text-sm text-white font-medium">Nightly Retrain</div>
+              <div class="text-[10px] text-gray-500">Auto retrain model at 02:00 IST</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <!-- Notifications -->
+      <div class="glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-bold text-white mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-accent text-lg">notifications</span> Notification
+          Preferences
+        </h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <span class="text-sm text-white">Critical Alerts</span>
+            <span class="text-xs text-green-400 font-bold">Always On</span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <span class="text-sm text-white">Queue Updates</span>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked
+                class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+            <span class="text-sm text-white">System Health</span>
+            <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-700 peer-checked:bg-brand-accent rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <!-- Data Retention -->
+      <div class="glass-card rounded-3xl p-6">
+        <h3 class="text-sm font-bold text-white mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-accent text-lg">database</span> Data &amp; Compliance
+        </h3>
+        <div class="space-y-4">
+          <div class="p-3 bg-white/5 rounded-xl">
+            <div class="flex justify-between items-center mb-1"><span class="text-sm text-white">Scan Data
+                Retention</span><span class="text-xs font-bold text-brand-neon">5 years</span></div>
+            <div class="text-[10px] text-gray-500">Per CBIC compliance mandate</div>
+          </div>
+          <div class="p-3 bg-white/5 rounded-xl">
+            <div class="flex justify-between items-center mb-1"><span class="text-sm text-white">Audit Log
+                Storage</span><span class="text-xs font-bold text-brand-neon">Immutable</span></div>
+            <div class="text-[10px] text-gray-500">Blockchain-backed, tamper-proof</div>
+          </div>
+          <div class="p-3 bg-white/5 rounded-xl">
+            <div class="flex justify-between items-center mb-1"><span class="text-sm text-white">Encryption</span><span
+                class="text-xs font-bold text-green-400">AES-256 + TLS 1.3</span></div>
+            <div class="text-[10px] text-gray-500">At rest and in transit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- JavaScript: Full Application Logic                                          -->
+  <!-- ========================================================================== -->
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-[60] space-y-3"></div>
+
+  <!-- Notification Panel -->
+  <div id="notifPanel"
+    class="fixed top-16 right-8 z-[55] w-80 glass-card rounded-2xl shadow-2xl border border-white/10 hidden overflow-hidden">
+    <div class="p-4 border-b border-white/5 flex items-center justify-between">
+      <h3 class="text-sm font-bold text-white">Notifications</h3>
+      <button onclick="toggleNotifPanel()" class="text-gray-500 hover:text-white"><span
+          class="material-symbols-outlined text-sm">close</span></button>
+    </div>
+    <div class="max-h-80 overflow-y-auto divide-y divide-white/5">
+      <div class="p-4 hover:bg-white/5 cursor-pointer" onclick="switchPage('detail'); toggleNotifPanel();">
+        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-brand-red"></span><span
+            class="text-xs font-bold text-white">Suspect Radiation Detected</span></div>
+        <p class="text-[10px] text-gray-400">Container CNTR-9921-A flagged at Pier 4. Confidence: 98%</p>
+        <span class="text-[9px] text-gray-600 mt-1 block">2 min ago</span>
+      </div>
+      <div class="p-4 hover:bg-white/5 cursor-pointer" onclick="switchPage('detail'); toggleNotifPanel();">
+        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-brand-amber"></span><span
+            class="text-xs font-bold text-white">Weight Discrepancy</span></div>
+        <p class="text-[10px] text-gray-400">Container MSK-4002-X shows 12% weight deviation from manifest.</p>
+        <span class="text-[9px] text-gray-600 mt-1 block">8 min ago</span>
+      </div>
+      <div class="p-4 hover:bg-white/5 cursor-pointer">
+        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-green-500"></span><span
+            class="text-xs font-bold text-white">AI Model Retrained</span></div>
+        <p class="text-[10px] text-gray-400">Nightly retrain complete. Accuracy improved to 94.2%</p>
+        <span class="text-[9px] text-gray-600 mt-1 block">1 hr ago</span>
+      </div>
+      <div class="p-4 hover:bg-white/5 cursor-pointer">
+        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-brand-accent"></span><span
+            class="text-xs font-bold text-white">Shift Change</span></div>
+        <p class="text-[10px] text-gray-400">Night shift operators now on duty. 4 operators active.</p>
+        <span class="text-[9px] text-gray-600 mt-1 block">2 hrs ago</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // PAGE NAVIGATION
+    // =========================================================================
+    let chartsDrawn = false;
+
+    function switchPage(page) {
+      document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById('page-' + page);
+      if (target) target.classList.remove('hidden');
+
+      // Update nav active states
+      const navItems = {
+        dashboard: 'nav-dashboard',
+        livequeue: 'nav-livequeue',
+        analytics: 'nav-analytics',
+        operators: 'nav-operators',
+        settings: 'nav-settings'
+      };
+      const activePage = page === 'detail' ? 'livequeue' : page;
+      Object.entries(navItems).forEach(([key, id]) => {
+        const navEl = document.getElementById(id);
+        if (!navEl) return;
+        if (key === activePage) {
+          navEl.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 text-white border border-white/5 cursor-pointer';
+          const svg = navEl.querySelector('svg');
+          if (svg) svg.classList.add('text-brand-accent');
+        } else {
+          navEl.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all text-gray-400 hover:text-white group cursor-pointer';
+          const svg = navEl.querySelector('svg');
+          if (svg) { svg.classList.remove('text-brand-accent'); svg.classList.add('group-hover:text-brand-accent'); }
         }
-      }, 5000);
+      });
+
+      const titles = {
+        dashboard: 'SCANNR PRO - Command Center',
+        livequeue: 'SCANNR PRO - Live Queue',
+        detail: 'SCANNR PRO - Container Risk Detail',
+        analytics: 'SCANNR PRO - Analytics',
+        operators: 'SCANNR PRO - Operators',
+        settings: 'SCANNR PRO - Settings'
+      };
+      document.title = titles[page] || 'SCANNR PRO';
+
+      // Draw analytics charts on first visit
+      if (page === 'analytics' && !chartsDrawn) {
+        chartsDrawn = true;
+        setTimeout(drawAnalyticsCharts, 100);
+      }
+    }
+
+    // =========================================================================
+    // TOAST SYSTEM
+    // =========================================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        info: 'border-brand-accent bg-brand-accent/10 text-brand-accent',
+        success: 'border-green-500 bg-green-500/10 text-green-400',
+        warning: 'border-brand-amber bg-brand-amber/10 text-brand-amber',
+        error: 'border-brand-red bg-brand-red/10 text-brand-red'
+      };
+      const icons = { info: 'info', success: 'check_circle', warning: 'warning', error: 'error' };
+      const toast = document.createElement('div');
+      toast.className = `glass-card border ${colors[type]} px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-medium shadow-2xl transform translate-x-full transition-transform duration-300`;
+      toast.innerHTML = `<span class="material-symbols-outlined text-lg">${icons[type]}</span>${message}`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-x-full'));
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // =========================================================================
+    // NOTIFICATION PANEL
+    // =========================================================================
+    function toggleNotifPanel() {
+      document.getElementById('notifPanel').classList.toggle('hidden');
+    }
+
+    // =========================================================================
+    // OVERRIDE MODAL
+    // =========================================================================
+    function openOverrideModal() {
+      document.getElementById('overrideModal').classList.remove('hidden');
+    }
+    function closeOverrideModal() {
+      document.getElementById('overrideModal').classList.add('hidden');
+      const textarea = document.getElementById('overrideReason');
+      if (textarea) textarea.value = '';
+      updateCharCount();
+    }
+    function updateCharCount() {
+      const textarea = document.getElementById('overrideReason');
+      const counter = document.getElementById('charCount');
+      if (textarea && counter) counter.textContent = textarea.value.length + '/500';
+    }
+
+    // =========================================================================
+    // LIVE QUEUE SEARCH & FILTER
+    // =========================================================================
+    function filterQueueTable() {
+      const searchInput = document.getElementById('queueSearch');
+      const query = searchInput ? searchInput.value.toLowerCase() : '';
+      const table = document.getElementById('queueTableBody');
+      if (!table) return;
+      const rows = table.querySelectorAll('tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const matchesSearch = !query || text.includes(query);
+        row.style.display = matchesSearch ? '' : 'none';
+      });
+    }
+
+    function filterByRisk(level) {
+      const table = document.getElementById('queueTableBody');
+      if (!table) return;
+      const rows = table.querySelectorAll('tr');
+      rows.forEach(row => {
+        if (level === 'all') { row.style.display = ''; return; }
+        const riskCell = row.querySelector('[data-risk]');
+        if (riskCell) {
+          row.style.display = riskCell.getAttribute('data-risk') === level ? '' : 'none';
+        }
+      });
+      // Update active button style
+      document.querySelectorAll('.risk-filter-btn').forEach(btn => {
+        btn.className = btn.getAttribute('data-level') === level
+          ? 'risk-filter-btn px-3 py-1 text-xs font-medium bg-brand-accent text-white rounded-md shadow-sm'
+          : 'risk-filter-btn px-3 py-1 text-xs font-medium text-gray-500 hover:text-white transition-colors';
+      });
+    }
+
+    // =========================================================================
+    // GENERATE REPORT
+    // =========================================================================
+    function generateReport() {
+      showToast('Report generated successfully! Downloading PDF...', 'success');
+    }
+
+    // =========================================================================
+    // HOLD FOR INSPECTION
+    // =========================================================================
+    function holdForInspection() {
+      showToast('Container placed on hold for physical inspection.', 'warning');
+    }
+
+    // =========================================================================
+    // ANALYTICS CHARTS
+    // =========================================================================
+    function drawAnalyticsCharts() {
+      // Donut chart
+      const laneCanvas = document.getElementById('laneChart');
+      if (laneCanvas) {
+        const ctx = laneCanvas.getContext('2d');
+        const cx = 100, cy = 100, r = 70, lw = 20;
+        const data = [
+          { pct: 0.72, color: '#22c55e' },
+          { pct: 0.18, color: '#F59E0B' },
+          { pct: 0.10, color: '#EF4444' }
+        ];
+        let start = -Math.PI / 2;
+        data.forEach(seg => {
+          const end = start + seg.pct * 2 * Math.PI;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, start, end);
+          ctx.strokeStyle = seg.color;
+          ctx.lineWidth = lw;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+          start = end + 0.04;
+        });
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('87K', cx, cy + 4);
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '10px Inter';
+        ctx.fillText('Total Scans', cx, cy + 20);
+      }
+
+      // Bar chart
+      const weeklyCanvas = document.getElementById('weeklyChart');
+      if (weeklyCanvas) {
+        const ctx = weeklyCanvas.getContext('2d');
+        const w = weeklyCanvas.offsetWidth;
+        const h = weeklyCanvas.offsetHeight;
+        weeklyCanvas.width = w;
+        weeklyCanvas.height = h;
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const values = [12400, 11800, 13200, 14100, 12900, 8200, 6800];
+        const max = Math.max(...values);
+        const bw = (w - 80) / days.length;
+        const pad = 40;
+
+        days.forEach((day, i) => {
+          const bh = (values[i] / max) * (h - 60);
+          const x = pad + i * bw + bw * 0.2;
+          const y = h - 30 - bh;
+          const grad = ctx.createLinearGradient(x, y, x, h - 30);
+          grad.addColorStop(0, '#3B82F6');
+          grad.addColorStop(1, 'rgba(59,130,246,0.2)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.roundRect(x, y, bw * 0.6, bh, [6, 6, 0, 0]);
+          ctx.fill();
+          ctx.fillStyle = '#6b7280';
+          ctx.font = '10px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText(day, x + bw * 0.3, h - 12);
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '9px Inter';
+          ctx.fillText((values[i] / 1000).toFixed(1) + 'K', x + bw * 0.3, y - 6);
+        });
+      }
+    }
+
+    // =========================================================================
+    // DASHBOARD INIT + LIVE DATA
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Generate hexagonal grid
+      const grid = document.getElementById('heatmapGrid');
+      if (grid) {
+        const colors = ['hex-blue-light', 'hex-blue-med', 'hex-blue-bright', 'hex-neon', ''];
+        for (let i = 0; i < 450; i++) {
+          const hex = document.createElement('div');
+          hex.className = 'hex ' + colors[Math.floor(Math.random() * colors.length)];
+          if (Math.random() > 0.95) hex.classList.add('animate-pulse');
+          grid.appendChild(hex);
+        }
+      }
+
+      // Throughput chart
+      const canvas = document.getElementById('throughputChart');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#00F2FF';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(0, 242, 255, 0.5)';
+        ctx.beginPath();
+        ctx.moveTo(0, 80);
+        ctx.bezierCurveTo(40, 100, 80, 20, 120, 60);
+        ctx.bezierCurveTo(160, 100, 200, 40, 240, 50);
+        ctx.bezierCurveTo(280, 60, 320, 10, 360, 40);
+        ctx.stroke();
+        const grad = ctx.createLinearGradient(0, 0, 0, 120);
+        grad.addColorStop(0, 'rgba(0, 242, 255, 0.2)');
+        grad.addColorStop(1, 'rgba(0, 242, 255, 0)');
+        ctx.lineTo(360, 120);
+        ctx.lineTo(0, 120);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      // Live throughput counter — auto-update every 3 seconds
+      const throughputEl = document.getElementById('throughputCounter');
+      if (throughputEl) {
+        setInterval(() => {
+          const current = parseInt(throughputEl.textContent.replace(/,/g, ''));
+          const delta = Math.floor(Math.random() * 60) - 25;
+          const next = Math.max(4500, Math.min(5200, current + delta));
+          throughputEl.textContent = next.toLocaleString();
+        }, 3000);
+      }
+
+      // Rotating hex pulses
+      setInterval(() => {
+        const hexes = document.querySelectorAll('.hex');
+        if (hexes.length === 0) return;
+        hexes.forEach(h => h.classList.remove('animate-pulse'));
+        for (let i = 0; i < 15; i++) {
+          const idx = Math.floor(Math.random() * hexes.length);
+          hexes[idx].classList.add('animate-pulse');
+        }
+      }, 4000);
+
+      // Simulated new container toast every 20 seconds on Dashboard
+      const containerIds = ['CNTR-4471-B', 'SHK-2291-C', 'HLG-0089-F', 'MBK-7712-A', 'DLH-3380-D'];
+      let toastIdx = 0;
+      setInterval(() => {
+        const activePage = document.querySelector('.page-view:not(.hidden)');
+        if (activePage && activePage.id === 'page-dashboard') {
+          showToast(`New scan: ${containerIds[toastIdx % containerIds.length]} entering queue`, 'info');
+          toastIdx++;
+        }
+      }, 20000);
+    });
+
+    // Close notification panel when clicking outside
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('notifPanel');
+      const bellBtn = document.getElementById('bellBtn');
+      if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && bellBtn && !bellBtn.contains(e.target)) {
+        panel.classList.add('hidden');
+      }
     });
   </script>
-</body></html>
+</body>
+
+</html>
