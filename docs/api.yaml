@@ -1,0 +1,937 @@
+openapi: 3.1.0
+info:
+  title: SCANNR — AI-Enabled Customs Clearance API
+  description: |
+    Three-pillar customs intelligence platform integrating Computer Vision (YOLOv8),
+    Blockchain Identity (Hyperledger Fabric), and Dynamic ML Risk Scoring (XGBoost).
+    
+    All endpoints require mTLS + JWT Bearer token authentication.
+    Base URL: https://api.scannr.in/api/v1
+  version: 1.0.0
+  contact:
+    name: SCANNR Engineering
+    email: engineering@scannr.in
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development (API Gateway)
+  - url: https://api.scannr.in/api/v1
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Clearance
+    description: Core clearance workflow — initiates all three pillars
+  - name: Dashboard
+    description: Real-time port statistics and monitoring
+  - name: Blockchain
+    description: Importer identity management on Hyperledger Fabric
+  - name: ICEGATE
+    description: ICEGATE manifest bridge (XML↔REST)
+  - name: Sanctions
+    description: OFAC / UN / INTERPOL sanctions screening
+  - name: Vision
+    description: X-ray scan analysis (vision-svc)
+  - name: Risk
+    description: Risk scoring engine (risk-svc)
+  - name: Tariff
+    description: CBIC tariff synchronisation (tariff-sync-svc)
+  - name: ML Monitor
+    description: Model drift detection, A/B testing, registry (ml-monitor-svc)
+  - name: Health
+    description: Service health checks
+
+paths:
+  # ─── Health ──────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: API Gateway health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─── Clearance ───────────────────────────────────────────────
+  /clearance/initiate:
+    post:
+      tags: [Clearance]
+      summary: Initiate clearance workflow
+      description: |
+        Triggers the full three-pillar clearance pipeline:
+        1. GSTN validation + ICEGATE manifest enrichment + MHA sanctions screening
+        2. Blockchain identity check (trust score)
+        3. Vision AI X-ray analysis (anomaly detection + Grad-CAM)
+        4. Risk scoring (25+ features → GREEN/YELLOW/RED lane)
+        5. Result stored to PostgreSQL with SHA-256 audit hash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClearanceInitiateRequest"
+      responses:
+        "200":
+          description: Clearance initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearanceInitiateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /clearance/{clearance_id}/result:
+    get:
+      tags: [Clearance]
+      summary: Get clearance result
+      parameters:
+        - name: clearance_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: CLR-20260218-a1b2c3d4
+      responses:
+        "200":
+          description: Clearance decision details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearanceResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /officer/override:
+    post:
+      tags: [Clearance]
+      summary: Officer overrides AI lane decision
+      description: |
+        Records officer override for audit trail and adds to ML retraining queue.
+        The override is logged in both clearance_decisions and officer_overrides tables.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficerOverrideRequest"
+      responses:
+        "200":
+          description: Override recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  override_id:
+                    type: string
+                    example: OV-a1b2c3d4
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ─── Dashboard ───────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      tags: [Dashboard]
+      summary: Real-time port statistics
+      description: Also available as WebSocket stream at /ws/stats (push every 5s)
+      responses:
+        "200":
+          description: Aggregated dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ─── Blockchain ──────────────────────────────────────────────
+  /blockchain/importer/register:
+    post:
+      tags: [Blockchain]
+      summary: Register new importer on Hyperledger Fabric
+      description: Requires CBIC admin JWT. Validates GSTIN via GSTN bridge first.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImporterRegisterRequest"
+      responses:
+        "200":
+          description: Importer registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImporterRegisterResponse"
+        "400":
+          description: Invalid GSTIN
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden — CBIC admin role required
+
+  /blockchain/importer/{gstin}/profile:
+    get:
+      tags: [Blockchain]
+      summary: Fetch immutable importer profile from blockchain
+      description: Returns trust profile enriched with GSTN compliance and sanctions check
+      parameters:
+        - name: gstin
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 27AABCU9603R1ZN
+      responses:
+        "200":
+          description: Importer profile with enrichments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImporterProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Importer not found on blockchain
+
+  # ─── ICEGATE ─────────────────────────────────────────────────
+  /icegate/manifest/{bill_no}:
+    get:
+      tags: [ICEGATE]
+      summary: Fetch shipping manifest via ICEGATE bridge
+      parameters:
+        - name: bill_no
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: string
+            default: "2026"
+      responses:
+        "200":
+          description: Manifest details (XML→JSON converted)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManifestData"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ─── Sanctions ───────────────────────────────────────────────
+  /sanctions/check:
+    post:
+      tags: [Sanctions]
+      summary: Check entity against OFAC/UN/INTERPOL sanctions lists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [entity_type, entity_value]
+              properties:
+                entity_type:
+                  type: string
+                  enum: [name, passport, country, vessel, aircraft]
+                entity_value:
+                  type: string
+      responses:
+        "200":
+          description: Sanctions check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SanctionsResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ─── Vision Service (port 8001) ──────────────────────────────
+  /scan:
+    post:
+      tags: [Vision]
+      summary: Submit X-ray scan for AI analysis
+      description: |
+        Runs YOLOv8 inference with Grad-CAM heatmap generation.
+        Returns bounding boxes, confidence scores, and heatmap URL.
+      servers:
+        - url: http://localhost:8001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scan_id]
+              properties:
+                scan_id:
+                  type: string
+                dicom_url:
+                  type: string
+                simulate_anomaly:
+                  type: boolean
+                  default: false
+                confidence:
+                  type: number
+                  default: 0.05
+                anomaly_class:
+                  type: string
+                  default: density_anomaly
+      responses:
+        "200":
+          description: Scan result with detections and heatmap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisionScanResult"
+
+  # ─── Risk Service (port 8002) ────────────────────────────────
+  /score:
+    post:
+      tags: [Risk]
+      summary: Compute risk score from 25+ features
+      servers:
+        - url: http://localhost:8002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RiskScoreRequest"
+      responses:
+        "200":
+          description: Risk score and lane decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScoreResponse"
+
+  /train:
+    post:
+      tags: [Risk]
+      summary: Train XGBoost risk model
+      servers:
+        - url: http://localhost:8002
+      responses:
+        "200":
+          description: Training result with metrics
+
+  /evaluate:
+    get:
+      tags: [Risk]
+      summary: Evaluate current risk model
+      servers:
+        - url: http://localhost:8002
+      responses:
+        "200":
+          description: Model evaluation metrics (accuracy, precision, recall, F1, AUC-ROC)
+
+  /retrain:
+    post:
+      tags: [Risk]
+      summary: Trigger conditional retrain (if >50 flagged samples)
+      servers:
+        - url: http://localhost:8002
+      responses:
+        "200":
+          description: Retrain status
+
+  /spike:
+    post:
+      tags: [Risk]
+      summary: Check for adversarial spike in risk classifications
+      servers:
+        - url: http://localhost:8002
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recent_labels:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Spike detection result
+
+  /weights:
+    post:
+      tags: [Risk]
+      summary: Update HS code risk weights (from tariff-sync-svc)
+      servers:
+        - url: http://localhost:8002
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weights:
+                  type: object
+                  additionalProperties:
+                    type: number
+      responses:
+        "200":
+          description: Weights updated
+
+  # ─── Tariff Sync Service (port 8003) ─────────────────────────
+  /sync:
+    post:
+      tags: [Tariff]
+      summary: Trigger immediate CBIC tariff sync
+      servers:
+        - url: http://localhost:8003
+      responses:
+        "200":
+          description: Sync job result
+
+  /tariffs:
+    get:
+      tags: [Tariff]
+      summary: List all tariff risk weights
+      servers:
+        - url: http://localhost:8003
+      responses:
+        "200":
+          description: Array of tariff risk weight records
+
+  /tariffs/{hs_code}:
+    get:
+      tags: [Tariff]
+      summary: Get risk weight for specific HS code
+      servers:
+        - url: http://localhost:8003
+      parameters:
+        - name: hs_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tariff risk weight detail
+
+  # ─── ML Monitor Service (port 8004) ──────────────────────────
+  /drift:
+    get:
+      tags: [ML Monitor]
+      summary: Get current drift detection status
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: Drift report with KS test and PSI per feature
+
+  /drift/baseline:
+    post:
+      tags: [ML Monitor]
+      summary: Set drift detection baseline
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: Baseline set
+
+  /drift/check:
+    post:
+      tags: [ML Monitor]
+      summary: Run drift check against baseline
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: Drift check results
+
+  /ab:
+    get:
+      tags: [ML Monitor]
+      summary: Get current A/B test status
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: A/B test status and statistics
+
+  /ab/start:
+    post:
+      tags: [ML Monitor]
+      summary: Start A/B test between two models
+      servers:
+        - url: http://localhost:8004
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model_a:
+                  type: string
+                model_b:
+                  type: string
+                traffic_split:
+                  type: number
+                  default: 0.5
+      responses:
+        "200":
+          description: A/B test started
+
+  /ab/stop:
+    post:
+      tags: [ML Monitor]
+      summary: Stop A/B test and declare winner
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: A/B test results with statistical significance
+
+  /ab/record:
+    post:
+      tags: [ML Monitor]
+      summary: Record A/B test observation
+      servers:
+        - url: http://localhost:8004
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variant:
+                  type: string
+                  enum: [A, B]
+                correct:
+                  type: boolean
+      responses:
+        "200":
+          description: Observation recorded
+
+  /registry:
+    get:
+      tags: [ML Monitor]
+      summary: List all registered models
+      servers:
+        - url: http://localhost:8004
+      responses:
+        "200":
+          description: Model registry listing
+
+  /registry/promote:
+    post:
+      tags: [ML Monitor]
+      summary: Promote model to production/staging
+      servers:
+        - url: http://localhost:8004
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                version:
+                  type: integer
+                stage:
+                  type: string
+                  enum: [Production, Staging, Archived]
+      responses:
+        "200":
+          description: Model promoted
+
+  /registry/production/{name}:
+    get:
+      tags: [ML Monitor]
+      summary: Get current production model version
+      servers:
+        - url: http://localhost:8004
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Production model details
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token issued by SCANNR auth service (mTLS + OAuth 2.0)
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+
+  schemas:
+    ClearanceInitiateRequest:
+      type: object
+      required: [container_id, importer_gstin, xray_scan_id]
+      properties:
+        container_id:
+          type: string
+          example: TCMU-2026-00147
+        importer_gstin:
+          type: string
+          example: 27AABCU9603R1ZN
+        manifest_url:
+          type: string
+        xray_scan_id:
+          type: string
+          example: SCN-MUM-20260205-0147
+        declared_value_inr:
+          type: number
+          example: 4500000
+        hs_code:
+          type: string
+          example: "8471.30"
+        weight:
+          type: number
+        volume:
+          type: number
+        category:
+          type: string
+        origin_country:
+          type: string
+          example: CN
+        transshipment_count:
+          type: integer
+          default: 0
+        bill_no:
+          type: string
+        simulate_anomaly:
+          type: boolean
+          default: false
+
+    ClearanceInitiateResponse:
+      type: object
+      properties:
+        clearance_id:
+          type: string
+          example: CLR-20260218-a1b2c3d4
+        status:
+          type: string
+          enum: [PROCESSING, ERROR]
+        estimated_completion_sec:
+          type: integer
+          example: 50
+        lane:
+          type: string
+          enum: [GREEN, YELLOW, RED]
+        risk_score:
+          type: number
+          example: 18.5
+        decision_time_sec:
+          type: number
+          example: 2.34
+
+    ClearanceResult:
+      type: object
+      properties:
+        clearance_id:
+          type: string
+        container_id:
+          type: string
+        importer_gstin:
+          type: string
+        risk_score:
+          type: number
+        lane:
+          type: string
+          enum: [GREEN, YELLOW, RED]
+        vision_anomaly:
+          type: boolean
+        vision_confidence:
+          type: number
+        blockchain_trust:
+          type: number
+        heatmap_s3_url:
+          type: string
+        officer_override:
+          type: boolean
+        override_reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        audit_hash:
+          type: string
+        status:
+          type: string
+
+    OfficerOverrideRequest:
+      type: object
+      required: [clearance_id, officer_id, override_to, reason]
+      properties:
+        clearance_id:
+          type: string
+          example: CLR-2026-00147
+        officer_id:
+          type: string
+          example: OFF-MUM-0042
+        override_to:
+          type: string
+          enum: [GREEN, YELLOW, RED]
+        reason:
+          type: string
+          example: Suspicious packaging pattern not flagged by AI
+
+    DashboardStats:
+      type: object
+      properties:
+        total_scanned_today:
+          type: integer
+        green_lane:
+          type: integer
+        yellow_lane:
+          type: integer
+        red_lane:
+          type: integer
+        officer_overrides_today:
+          type: integer
+        avg_risk_score:
+          type: number
+        recent_clearances:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClearanceResult"
+
+    ImporterRegisterRequest:
+      type: object
+      required: [importer_gstin]
+      properties:
+        importer_gstin:
+          type: string
+          example: 27AABCU9603R1ZN
+        years_active:
+          type: integer
+          default: 0
+        aeo_tier:
+          type: integer
+          default: 0
+        violations:
+          type: integer
+          default: 0
+        clean_inspections:
+          type: integer
+          default: 0
+
+    ImporterRegisterResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: registered
+        gstin:
+          type: string
+        gstn_validation:
+          type: object
+        blockchain:
+          type: object
+
+    ImporterProfileResponse:
+      type: object
+      properties:
+        gstin:
+          type: string
+        blockchain_profile:
+          type: object
+          properties:
+            importer_id:
+              type: string
+            registration_date:
+              type: string
+            trust_score:
+              type: number
+            aeo_certificates:
+              type: array
+              items:
+                type: object
+            violation_history:
+              type: array
+              items:
+                type: object
+        gstn_compliance:
+          type: object
+          properties:
+            compliant:
+              type: boolean
+            filing_rate:
+              type: number
+        sanctions_check:
+          type: object
+          properties:
+            match:
+              type: boolean
+            severity:
+              type: string
+
+    ManifestData:
+      type: object
+      properties:
+        container_id:
+          type: string
+        importer_gstin:
+          type: string
+        manifest_url:
+          type: string
+        xray_scan_id:
+          type: string
+        declared_value_inr:
+          type: number
+        hs_code:
+          type: string
+        weight:
+          type: number
+        volume:
+          type: number
+        category:
+          type: string
+        origin_country:
+          type: string
+
+    SanctionsResult:
+      type: object
+      properties:
+        match:
+          type: boolean
+        severity:
+          type: string
+          enum: [HIGH, MEDIUM, LOW, NONE]
+        lists:
+          type: array
+          items:
+            type: string
+        entity_type:
+          type: string
+        entity_value:
+          type: string
+        programs:
+          type: array
+          items:
+            type: string
+        checked_at:
+          type: string
+          format: date-time
+
+    VisionScanResult:
+      type: object
+      properties:
+        scan_id:
+          type: string
+        anomaly_detected:
+          type: boolean
+        confidence:
+          type: number
+        detections:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              confidence:
+                type: number
+              bbox:
+                type: array
+                items:
+                  type: number
+        heatmap_url:
+          type: string
+        processing_time_ms:
+          type: number
+
+    RiskScoreRequest:
+      type: object
+      properties:
+        blockchain_trust_score:
+          type: number
+        years_active:
+          type: integer
+        violation_count:
+          type: integer
+        aeo_tier:
+          type: integer
+        vision_anomaly_flag:
+          type: boolean
+        vision_confidence:
+          type: number
+        vision_detection_count:
+          type: integer
+        vision_class:
+          type: string
+        cargo_hs_code:
+          type: string
+        cargo_declared_value:
+          type: number
+        cargo_weight:
+          type: number
+        cargo_volume:
+          type: number
+        cargo_category:
+          type: string
+        route_origin_risk_index:
+          type: number
+        route_transshipment_count:
+          type: integer
+        route_carrier_history:
+          type: integer
+        intel_ofac_match:
+          type: boolean
+        intel_un_conflict_flag:
+          type: boolean
+        intel_interpol_alert:
+          type: boolean
+        intel_seasonal_index:
+          type: number
+
+    RiskScoreResponse:
+      type: object
+      properties:
+        risk_score:
+          type: number
+          example: 18.5
+        lane:
+          type: string
+          enum: [GREEN, YELLOW, RED]
+        top_features:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              importance:
+                type: number

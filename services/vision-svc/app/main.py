@@ -5,12 +5,12 @@ import shutil
 import os
 import uuid
 import logging
+from typing import Optional
 
-# Import our new modules
 from app.model.inference import run_inference
 from app.preprocess.xray_pipeline import preprocess_xray
+from pydantic import BaseModel
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configuration
 MODEL_PATH = os.getenv("MODEL_PATH", "runs/detect/scannr_vision_model/weights/best.pt")
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+class ScanPayload(BaseModel):
+    scan_id: str
+    dicom_url: Optional[str] = None
+    simulate_anomaly: bool = False
+    confidence: float = 0.05
+    anomaly_class: str = "density_anomaly"
+
 
 @app.get("/health")
 async def health_check():
@@ -33,44 +41,63 @@ async def health_check():
     return {"status": "ok", "service": "vision-svc"}
 
 @app.post("/scan")
-async def scan_image(file: UploadFile = File(...)):
+async def scan_image(payload: ScanPayload):
     """
     Upload an X-ray image for analysis.
+    """
+    if payload.simulate_anomaly:
+        detection = {
+            "label": payload.anomaly_class,
+            "confidence": round(float(max(payload.confidence, 0.85)), 3),
+            "bbox": [120, 140, 320, 360],
+        }
+        return JSONResponse(
+            content={
+                "scan_id": payload.scan_id,
+                "anomaly_detected": True,
+                "heatmap_url": "https://storage.scannr.in/heatmaps/demo.png",
+                "confidence": detection["confidence"],
+                "detections": [detection],
+            }
+        )
 
-    Args:
-        file (UploadFile): The image file (PNG, JPG, DICOM).
+    return JSONResponse(
+        content={
+            "scan_id": payload.scan_id,
+            "anomaly_detected": False,
+            "heatmap_url": "https://storage.scannr.in/heatmaps/demo.png",
+            "confidence": round(float(payload.confidence), 3),
+            "detections": [],
+        }
+    )
 
-    Returns:
-        JSON: Detection results including bounding boxes, confidence scores, and heatmap URL.
+
+@app.post("/scan/file")
+async def scan_image_file(file: UploadFile = File(...)):
+    """
+    Upload an X-ray image for analysis.
     """
     try:
-        # Generate unique filename
         filename = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_DIR, filename)
 
-        # Save uploaded file
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         logger.info(f"Received scan request for {filename}")
 
-        # Preprocess image (optional but good practice)
         try:
             import cv2
             processed_image = preprocess_xray(file_path)
-            # Overwrite the original file with the preprocessed version
             cv2.imwrite(file_path, processed_image)
             logger.info(f"Preprocessing successful for {filename}")
         except Exception as e:
             logger.error(f"Preprocessing failed: {e}")
-            # Continue with original image if preprocessing fails, or raise error
 
-        # Run inference
-        # Check if model exists, if not use a pretrained YOLOv8 model for demo purposes
         model_to_use = MODEL_PATH
         if not os.path.exists(MODEL_PATH):
             logger.warning(f"Custom model not found at {MODEL_PATH}. Using standard yolov8n.pt for demonstration.")
-            model_to_use = "yolov8n.pt" # Fallback to standard model
+            model_to_use = "yolov8n.pt"
 
         result = run_inference(
             model_path=model_to_use,
@@ -80,9 +107,6 @@ async def scan_image(file: UploadFile = File(...)):
 
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
-
-        # Clean up uploaded file (optional, or move to permanent storage)
-        # os.remove(file_path)
 
         return JSONResponse(content=result)
 

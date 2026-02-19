@@ -12,3 +12,5 @@ Pillow
 requests
 aiofiles
 pydantic
+pytorch-grad-cam
+pydicom

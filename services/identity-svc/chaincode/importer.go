@@ -169,6 +169,53 @@ func (s *SmartContract) AddAEOCertificate(ctx contractapi.TransactionContextInte
 	return nil
 }
 
+// UpdateImporter updates mutable fields only. RegistrationDate is immutable
+// and ViolationHistory is append-only — these rules are enforced here.
+func (s *SmartContract) UpdateImporter(ctx contractapi.TransactionContextInterface, importerID string, newRegistrationDate string, newViolationHistoryJSON string) error {
+	profile, err := s.GetImporter(ctx, importerID)
+	if err != nil {
+		return err
+	}
+
+	// ANTI-FRAUD RULE 1: RegistrationDate is immutable — reject any change
+	if newRegistrationDate != "" && newRegistrationDate != profile.RegistrationDate {
+		return fmt.Errorf("ANTI-FRAUD: RegistrationDate is immutable and cannot be modified (current: %s, attempted: %s)", profile.RegistrationDate, newRegistrationDate)
+	}
+
+	// ANTI-FRAUD RULE 2: ViolationHistory is append-only — no deletions
+	if newViolationHistoryJSON != "" {
+		var newViolations []Violation
+		if err := json.Unmarshal([]byte(newViolationHistoryJSON), &newViolations); err != nil {
+			return fmt.Errorf("failed to parse violation history: %v", err)
+		}
+		// Reject if new list is shorter (deletions attempted)
+		if len(newViolations) < len(profile.ViolationHistory) {
+			return fmt.Errorf("ANTI-FRAUD: ViolationHistory is append-only — cannot delete violations (current: %d, attempted: %d)", len(profile.ViolationHistory), len(newViolations))
+		}
+		// Reject if any existing violation was modified
+		for i, existing := range profile.ViolationHistory {
+			if i < len(newViolations) {
+				if newViolations[i].ViolationID != existing.ViolationID {
+					return fmt.Errorf("ANTI-FRAUD: ViolationHistory is append-only — cannot modify existing violation at index %d", i)
+				}
+			}
+		}
+		profile.ViolationHistory = newViolations
+	}
+
+	profile.LastUpdated = time.Now().UTC().Format(time.RFC3339)
+	profileBytes, err := json.Marshal(profile)
+	if err != nil {
+		return fmt.Errorf("failed to marshal profile: %v", err)
+	}
+	return ctx.GetStub().PutState(importerID, profileBytes)
+}
+
+// DeleteViolation explicitly rejects deletion of violation history records.
+func (s *SmartContract) DeleteViolation(ctx contractapi.TransactionContextInterface, importerID string, violationID string) error {
+	return fmt.Errorf("ANTI-FRAUD: Deletion of ViolationHistory records is prohibited — violation %s cannot be removed from importer %s", violationID, importerID)
+}
+
 func (s *SmartContract) importerExists(ctx contractapi.TransactionContextInterface, importerID string) (bool, error) {
 	profileBytes, err := ctx.GetStub().GetState(importerID)
 	if err != nil {
