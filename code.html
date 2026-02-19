@@ -515,7 +515,7 @@
           </div>
           <div class="space-y-3">
             <!-- Alert Item 1 -->
-            <div onclick="switchPage('detail')"
+            <div onclick="window._activeContainerId='MSKU-908122-4'; switchPage('detail')"
               class="p-3 bg-brand-red/10 border border-brand-red/20 rounded-xl flex items-center justify-between cursor-pointer hover:bg-brand-red/20 transition-colors">
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 rounded-full bg-brand-red animate-ping"></div>
@@ -527,7 +527,7 @@
               <span class="text-[9px] font-black bg-brand-red text-white px-1.5 py-0.5 rounded">CRITICAL</span>
             </div>
             <!-- Alert Item 2 -->
-            <div onclick="switchPage('detail')"
+            <div onclick="window._activeContainerId='TRHU-110293-8'; switchPage('detail')"
               class="p-3 bg-brand-amber/10 border border-brand-amber/20 rounded-xl flex items-center justify-between cursor-pointer hover:bg-brand-amber/20 transition-colors">
               <div class="flex items-center gap-3">
                 <div class="w-2 h-2 rounded-full bg-brand-amber"></div>
@@ -1733,6 +1733,144 @@
       if (page === 'analytics' && !chartsDrawn) {
         chartsDrawn = true;
         setTimeout(drawAnalyticsCharts, 100);
+      }
+
+      // Fetch live data from risk-svc API
+      if (page === 'livequeue') loadQueueFromAPI();
+      if (page === 'detail' && window._activeContainerId) {
+        loadContainerDetail(window._activeContainerId);
+      }
+    }
+
+    // =========================================================================
+    // API BASE URL
+    // =========================================================================
+    const API_BASE = window.location.origin;
+
+    // =========================================================================
+    // LIVE QUEUE — Fetch from /api/queue
+    // =========================================================================
+    async function loadQueueFromAPI() {
+      const tbody = document.getElementById('queueTableBody');
+      if (!tbody) return;
+      try {
+        const res = await fetch(API_BASE + '/api/queue');
+        if (!res.ok) throw new Error('API unavailable');
+        const data = await res.json();
+        showToast('Queue synced from risk-svc API', 'success');
+
+        // Rebuild table rows
+        tbody.innerHTML = '';
+        data.containers.forEach(c => {
+          const riskLevel = c.lane === 'RED' ? 'high' : c.lane === 'YELLOW' ? 'medium' : 'low';
+          const riskColor = c.lane === 'RED' ? 'brand-red' : c.lane === 'YELLOW' ? 'brand-amber' : 'green-500';
+          const statusLabel = c.lane === 'RED' ? 'Flagged' : c.lane === 'YELLOW' ? 'Review' : 'Cleared';
+          const statusClass = c.lane === 'RED'
+            ? 'bg-brand-red/10 text-brand-red border-brand-red/20'
+            : c.lane === 'YELLOW'
+              ? 'bg-brand-amber/10 text-brand-amber border-brand-amber/20'
+              : 'bg-green-500/10 text-green-500 border-green-500/20';
+          const btnClass = c.lane === 'RED'
+            ? 'bg-brand-red hover:bg-red-600 text-white shadow-lg shadow-red-900/20'
+            : c.lane === 'YELLOW'
+              ? 'bg-brand-amber hover:bg-amber-600 text-black shadow-lg shadow-amber-900/20'
+              : 'bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white border border-white/10';
+          const btnLabel = c.lane === 'RED' || c.lane === 'YELLOW' ? 'Investigate' : 'Archive';
+          const barGrad = c.lane === 'RED'
+            ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+            : c.lane === 'YELLOW'
+              ? 'bg-brand-amber'
+              : 'bg-green-500';
+          const scoreLabel = c.lane === 'RED' ? c.risk_score + '% Critical'
+            : c.lane === 'YELLOW' ? c.risk_score + '% Elevated'
+              : c.risk_score + '% Low';
+
+          const avatarColors = { JD: 'bg-gray-700', AI: 'bg-indigo-600', JS: 'bg-pink-700', MK: 'bg-purple-600', DC: 'bg-blue-600' };
+          const avColor = avatarColors[c.operator] || 'bg-gray-600';
+
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-white/5 transition-colors group';
+          row.innerHTML = `
+            <td class="p-4"><div class="flex flex-col"><span class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">${c.id}</span><span class="text-[10px] text-gray-500">${c.type}</span></div></td>
+            <td class="p-4"><div class="flex items-center gap-2"><span class="text-lg">${c.flag}</span><span class="text-sm text-gray-300">${c.origin}</span></div></td>
+            <td class="p-4"><span data-risk="${riskLevel}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${statusClass} border"><span class="w-1.5 h-1.5 rounded-full bg-${riskColor}"></span>${statusLabel}</span></td>
+            <td class="p-4"><div class="w-full max-w-[200px]"><div class="flex justify-between text-[10px] mb-1"><span class="text-${riskColor} font-bold">${scoreLabel}</span></div><div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="${barGrad} h-full rounded-full" style="width:${c.risk_score}%"></div></div></div></td>
+            <td class="p-4"><div class="flex -space-x-2 overflow-hidden"><div class="w-8 h-8 rounded-full ${avColor} flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">${c.operator}</div></div></td>
+            <td class="p-4 text-right"><button class="${btnClass} text-xs font-bold py-1.5 px-4 rounded-lg transition-all" onclick="window._activeContainerId='${c.id}'; switchPage('detail')">${btnLabel}</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        // Update count
+        const countEl = document.querySelector('[data-purpose="livequeue-content-layout"] .text-xs.text-gray-500');
+        if (countEl) countEl.innerHTML = `Showing <span class="text-white font-bold">1-${data.total}</span> of <span class="text-white font-bold">${data.total}</span> active containers`;
+
+      } catch (e) {
+        console.warn('API unavailable, using static HTML:', e.message);
+      }
+    }
+
+    // =========================================================================
+    // CONTAINER DETAIL — Fetch from /api/containers/:id
+    // =========================================================================
+    async function loadContainerDetail(containerId) {
+      try {
+        const res = await fetch(API_BASE + '/api/containers/' + encodeURIComponent(containerId));
+        if (!res.ok) throw new Error('Not found');
+        const c = await res.json();
+
+        // Update container ID heading
+        const heading = document.querySelector('#page-detail h1');
+        if (heading) heading.textContent = c.id;
+
+        // Update risk score in gauge text
+        const gaugeText = document.querySelector('#page-detail .percentage');
+        if (gaugeText) gaugeText.textContent = Math.round(c.risk_score);
+
+        // Update gauge arc
+        const gaugeArc = document.querySelector('#page-detail .circle[stroke-dasharray]');
+        if (gaugeArc) gaugeArc.setAttribute('stroke-dasharray', `${Math.round(c.risk_score)}, 100`);
+
+        // Update lane label
+        const laneLabel = document.querySelector('#page-detail [class*="inline-block px-3 py-1 rounded-full"]');
+        if (laneLabel) {
+          const laneColors = { RED: 'bg-brand-red', YELLOW: 'bg-brand-amber', GREEN: 'bg-green-500' };
+          laneLabel.className = `inline-block px-3 py-1 rounded-full ${laneColors[c.lane] || 'bg-brand-red'} text-white text-xs font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(239,68,68,0.4)]`;
+          laneLabel.textContent = c.lane === 'RED' ? 'Critical' : c.lane === 'YELLOW' ? 'Elevated' : 'Low Risk';
+        }
+
+        // Update risk factors from API top_features
+        if (c.top_features && c.top_features.length) {
+          const featureNames = {
+            blockchain_trust_score: 'Blockchain Trust',
+            vision_confidence: 'Vision AI Confidence',
+            cargo_value: 'Cargo Value',
+            route_origin_risk: 'Route Origin Risk'
+          };
+          const factorsContainer = document.querySelector('#page-detail .space-y-4.overflow-y-auto');
+          if (factorsContainer) {
+            factorsContainer.innerHTML = c.top_features.map(f => {
+              const pct = Math.min(100, Math.abs(parseFloat(f.impact)) * 3);
+              const color = pct > 60 ? 'brand-red' : pct > 30 ? 'brand-amber' : 'green-500';
+              const label = featureNames[f.name] || f.name.replace(/_/g, ' ');
+              return `<div>
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-xs font-medium text-gray-300">${label}</span>
+                  <span class="text-xs font-bold text-${color}">Impact: ${f.impact}</span>
+                </div>
+                <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-${color} h-full" style="width:${pct}%"></div>
+                </div>
+              </div>`;
+            }).join('');
+          }
+        }
+
+        // Show model info
+        showToast(`Scored by ${c.model_used} — Risk: ${c.risk_score}% (${c.lane})`, c.lane === 'RED' ? 'error' : c.lane === 'YELLOW' ? 'warning' : 'success');
+
+      } catch (e) {
+        console.warn('Container detail API unavailable:', e.message);
       }
     }
 
