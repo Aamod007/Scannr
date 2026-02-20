@@ -282,6 +282,256 @@
     </div>
   </div>
 
+  <!-- Initiate Clearance Modal -->
+  <div id="initiateModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-brand-amber font-mono tracking-widest">INITIATE CLEARANCE</div>
+          <h3 class="text-lg font-bold text-white mt-1">New Container Submission</h3>
+        </div>
+        <button onclick="closeModal('initiateModal')" class="text-gray-500 hover:text-white"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Container ID</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="TCMU-2026-00147"></div>
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Importer GSTIN</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="27AABCU9603R1ZN"></div>
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Manifest URL</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="https://icegate.gov.in/..."></div>
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">X-ray Scan ID</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="SCN-MUM-20260205-0147"></div>
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Declared Value
+              (INR)</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="4500000"></div>
+          <div><label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">HS Code</label><input
+              class="w-full bg-brand-dark/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-600"
+              placeholder="8471.30"></div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="closeModal('initiateModal')"
+            class="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 hover:text-white text-sm">Cancel</button>
+          <button onclick="submitClearance()"
+            class="flex-[2] py-2.5 rounded-xl bg-brand-amber text-black font-bold text-sm">Submit for Clearance
+            →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Importer Lookup Modal -->
+  <div id="importerModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div class="text-[10px] text-brand-amber font-mono tracking-widest">BLOCKCHAIN IMPORTER LOOKUP</div>
+        <button onclick="closeModal('importerModal')" class="text-gray-500 hover:text-white"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="p-6">
+        <div class="flex gap-3 mb-6">
+          <input id="gstinInput"
+            class="flex-1 bg-brand-dark/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder-gray-600"
+            placeholder="Enter GSTIN (e.g. 27AABCU9603R1ZN)">
+          <button onclick="lookupImporter()"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Lookup →</button>
+        </div>
+        <div id="importerResult" class="hidden">
+          <div class="flex justify-between items-start mb-5">
+            <div>
+              <div class="text-lg font-bold text-white">TechCorp India Pvt. Ltd.</div>
+              <div class="text-xs text-gray-500 font-mono mt-1">27AABCU9603R1ZN</div>
+            </div>
+            <div class="bg-brand-dark/50 rounded-xl p-3 text-center">
+              <div class="text-3xl font-bold text-green-400 font-mono">88</div>
+              <div class="text-[9px] text-gray-500 mt-1">TRUST SCORE</div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span
+                class="text-gray-500">Registered Since</span><span class="text-white font-mono">2019-01-14</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span class="text-gray-500">Years
+                Active</span><span class="text-white font-mono">7 years</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span class="text-gray-500">AEO
+                Tier</span><span class="text-white font-mono">Tier 1 Certified</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span class="text-gray-500">Total
+                Inspections</span><span class="text-white font-mono">47</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span
+                class="text-gray-500">Violations</span><span class="text-green-400 font-mono">None ✅</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span class="text-gray-500">Sanctions
+                Match</span><span class="text-green-400 font-mono">None ✅</span></div>
+            <div class="flex justify-between py-2 border-b border-white/5 text-xs"><span class="text-gray-500">Block
+                Hash</span><span class="text-white font-mono">0x3f9a2c...e221</span></div>
+          </div>
+          <div class="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-[11px] text-green-400"> 🔒
+            Record verified on Hyperledger Fabric · Tamper-proof · Block #184729</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sanctions Check Modal -->
+  <div id="sanctionsModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+    <div class="glass-card w-full max-w-md rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div class="text-[10px] text-brand-amber font-mono tracking-widest">SANCTIONS CHECK</div>
+        <button onclick="closeModal('sanctionsModal')" class="text-gray-500 hover:text-white"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="p-6">
+        <div class="flex gap-3 mb-5">
+          <input id="sanctionsInput"
+            class="flex-1 bg-brand-dark/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600"
+            placeholder="Company name, GSTIN, or individual">
+          <button onclick="runSanctionsCheck()"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Check</button>
+        </div>
+        <div id="sanctionsResult" class="hidden space-y-2">
+          <div class="flex justify-between items-center p-3 bg-brand-dark/50 rounded-xl">
+            <div>
+              <div class="text-sm text-white">OFAC SDN List</div>
+              <div class="text-[10px] text-gray-500 mt-1">Updated: Feb 18, 2026</div>
+            </div><span class="text-green-400 font-mono text-xs font-bold">✓ CLEAR</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-brand-dark/50 rounded-xl">
+            <div>
+              <div class="text-sm text-white">UN Consolidated</div>
+              <div class="text-[10px] text-gray-500 mt-1">Updated: Feb 17, 2026</div>
+            </div><span class="text-green-400 font-mono text-xs font-bold">✓ CLEAR</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-brand-dark/50 rounded-xl">
+            <div>
+              <div class="text-sm text-white">EU Sanctions</div>
+              <div class="text-[10px] text-gray-500 mt-1">Updated: Feb 16, 2026</div>
+            </div><span class="text-green-400 font-mono text-xs font-bold">✓ CLEAR</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-brand-dark/50 rounded-xl">
+            <div>
+              <div class="text-sm text-white">INTERPOL Notices</div>
+              <div class="text-[10px] text-gray-500 mt-1">Updated: Feb 18, 2026</div>
+            </div><span class="text-green-400 font-mono text-xs font-bold">✓ CLEAR</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-brand-dark/50 rounded-xl">
+            <div>
+              <div class="text-sm text-white">India CIBIL</div>
+              <div class="text-[10px] text-gray-500 mt-1">Updated: Feb 15, 2026</div>
+            </div><span class="text-green-400 font-mono text-xs font-bold">✓ CLEAR</span>
+          </div>
+          <div class="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
+            <div class="text-base font-bold text-green-400">No Sanctions Match Found</div>
+            <div class="text-xs text-gray-500 mt-1">Entity cleared across all 5 databases</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vision AI Heatmap Viewer Modal -->
+  <div id="heatmapModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 hidden">
+    <div class="glass-card w-full max-w-4xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-brand-amber font-mono tracking-widest">VISION AI ANALYSIS</div>
+          <h3 id="heatmapContainerId" class="text-lg font-bold text-white mt-1">CNTR-9921-A</h3>
+        </div>
+        <button onclick="closeModal('heatmapModal')"
+          class="px-4 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white text-sm">✕ Close</button>
+      </div>
+      <div class="p-6">
+        <div class="flex gap-3 mb-5">
+          <button onclick="setHeatmapView('heatmap')"
+            class="heatmap-tab px-4 py-2 rounded-lg bg-blue-600/20 border border-blue-600/40 text-blue-400 text-xs font-medium"
+            data-view="heatmap">Heatmap</button>
+          <button onclick="setHeatmapView('xray')"
+            class="heatmap-tab px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-xs font-medium"
+            data-view="xray">Raw X-Ray</button>
+          <button onclick="setHeatmapView('split')"
+            class="heatmap-tab px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-xs font-medium"
+            data-view="split">Split View</button>
+        </div>
+        <div class="flex gap-4" id="heatmapViewport">
+          <div id="xrayPanel" class="hidden flex-1 bg-brand-dark rounded-xl h-64 relative overflow-hidden">
+            <svg width="100%" height="100%" viewBox="0 0 300 260">
+              <rect width="300" height="260" fill="#0A1020" />
+              <rect x="20" y="30" width="260" height="190" rx="6" fill="none" stroke="rgba(100,140,200,0.3)"
+                stroke-width="1" />
+              <rect x="40" y="45" width="60" height="80" rx="2" fill="rgba(180,200,240,0.25)" />
+              <rect x="120" y="40" width="80" height="90" rx="2" fill="rgba(160,190,230,0.2)" />
+              <rect x="220" y="50" width="50" height="70" rx="2" fill="rgba(200,210,240,0.3)" />
+              <rect x="30" y="140" width="240" height="40" rx="2" fill="rgba(140,170,220,0.12)" />
+            </svg>
+            <div class="absolute bottom-3 left-3 text-[10px] text-gray-600 font-mono">RAW X-RAY</div>
+          </div>
+          <div id="heatmapPanel" class="flex-1 bg-brand-dark rounded-xl h-64 relative overflow-hidden">
+            <svg width="100%" height="100%" viewBox="0 0 300 260">
+              <rect width="300" height="260" fill="#0A1020" />
+              <ellipse cx="55" cy="80" rx="45" ry="40" fill="rgba(239,68,68,0.55)" />
+              <ellipse cx="55" cy="80" rx="28" ry="25" fill="rgba(239,68,68,0.75)" />
+              <ellipse cx="55" cy="80" rx="14" ry="12" fill="rgba(255,120,50,0.9)" />
+              <ellipse cx="180" cy="100" rx="20" ry="16" fill="rgba(245,158,11,0.45)" />
+              <rect x="22" y="50" width="68" height="60" fill="none" stroke="#EF4444" stroke-width="2"
+                stroke-dasharray="4,3" rx="2" />
+              <text x="24" y="46" fill="#EF4444" font-size="9" font-family="monospace">density_anomaly 91%</text>
+              <rect x="160" y="82" width="42" height="36" fill="none" stroke="#F59E0B" stroke-width="1.5"
+                stroke-dasharray="3,2" rx="2" />
+              <text x="162" y="79" fill="#F59E0B" font-size="8" font-family="monospace">void 42%</text>
+            </svg>
+            <div class="absolute bottom-3 left-3 text-[10px] text-red-400/60 font-mono">GRAD-CAM HEATMAP</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-5">
+          <div class="bg-brand-dark/50 rounded-xl p-4">
+            <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-3">Detections</div>
+            <div class="flex justify-between items-center py-2 border-b border-white/5">
+              <div>
+                <div class="text-sm font-mono text-red-400">density_anomaly</div>
+                <div class="text-[10px] text-gray-500">x:22 y:50 w:68 h:60</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-mono font-bold text-red-400">91%</div>
+                <div class="text-[9px] text-red-400/50">HIGH SEV</div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <div>
+                <div class="text-sm font-mono text-brand-amber">void_region</div>
+                <div class="text-[10px] text-gray-500">x:160 y:82 w:42 h:36</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-mono font-bold text-brand-amber">42%</div>
+                <div class="text-[9px] text-brand-amber/50">MED SEV</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-brand-dark/50 rounded-xl p-4">
+            <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-3">Similar Case</div>
+            <div class="text-sm font-mono text-brand-amber mb-2">#CH-2024-4471</div>
+            <div class="text-xs text-gray-300 leading-relaxed">Gold bars concealed in electronics.<br>Port: Chennai ·
+              Feb 2024</div>
+            <div class="text-[10px] text-gray-500 mt-3">Outcome: 15kg gold seized · Importer blacklisted</div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-lg border border-white/10 text-gray-400 text-[11px]">Download
+                Report</button>
+              <button
+                class="flex-1 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[11px]">Flag for
+                Retrain</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- BEGIN: Left Sidebar -->
   <aside class="w-64 border-r border-white/5 flex flex-col h-full bg-brand-dark z-20" data-purpose="sidebar-navigation">
     <div class="p-6">
@@ -372,20 +622,41 @@
   <!-- ========================================================================== -->
   <main id="page-dashboard" class="page-view flex-1 overflow-y-auto p-8 relative" data-purpose="main-content-layout">
     <!-- Header Section -->
+    <!-- Top Bar -->
+    <div class="glass-card rounded-2xl px-5 py-3 mb-6 flex items-center justify-between">
+      <div class="text-xs font-mono text-gray-500"><span class="text-brand-amber">▸</span> Budget 2026-27 · Para 87 ·
+        Customs Digitalization Initiative</div>
+      <div class="flex items-center gap-4">
+        <div id="liveClockDash" class="text-xs font-mono text-gray-500"></div>
+        <div class="relative cursor-pointer" onclick="toggleNotifPanel()">
+          <div class="w-8 h-8 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center justify-center">🔔
+          </div>
+          <div id="alertBadgeTop"
+            class="absolute -top-1 -right-1 w-4 h-4 bg-brand-red rounded-full flex items-center justify-center text-[8px] font-mono text-white font-bold">
+            3</div>
+        </div>
+        <div
+          class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold text-white cursor-pointer">
+          RK</div>
+      </div>
+    </div>
     <header class="flex items-center justify-between mb-8">
       <div>
-        <h1 class="text-2xl font-bold text-white">Command Center</h1>
-        <p class="text-sm text-gray-500">Real-time port security &amp; throughput monitoring</p>
+        <div class="text-[10px] font-mono text-brand-amber tracking-widest">COMMAND CENTER · MUMBAI JNPT</div>
+        <h1 class="text-2xl font-bold text-white mt-1">Live Dashboard</h1>
       </div>
-      <div class="flex items-center gap-4">
-        <div class="relative">
-          <input
-            class="bg-brand-card border-white/5 rounded-xl px-4 py-2 text-sm w-64 focus:ring-brand-accent focus:border-brand-accent text-white placeholder-gray-600"
-            placeholder="Search container ID..." type="text" />
-        </div>
+      <div class="flex items-center gap-3">
+        <button onclick="openModal('sanctionsModal')"
+          class="px-3 py-2 rounded-xl border border-white/10 text-gray-400 hover:text-white text-xs transition-colors">Sanctions
+          Check</button>
+        <button onclick="openModal('importerModal')"
+          class="px-3 py-2 rounded-xl border border-white/10 text-gray-400 hover:text-white text-xs transition-colors">Importer
+          Lookup</button>
+        <button onclick="openModal('initiateModal')"
+          class="px-4 py-2 rounded-xl bg-brand-amber text-black text-xs font-bold">+ Initiate Clearance</button>
         <button id="bellBtn" onclick="toggleNotifPanel()"
           class="glass-card p-2 rounded-xl text-gray-400 hover:text-white transition-colors relative">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -543,8 +814,29 @@
       </aside>
       <!-- END: Side Data Panels -->
     </div>
+    <!-- Live Activity Feed -->
+    <div class="mt-6 glass-card rounded-3xl p-4">
+      <div class="text-[10px] text-gray-500 uppercase tracking-widest mb-3">Live Activity Feed</div>
+      <div class="flex gap-6 overflow-x-auto pb-1" id="activityFeedContainer">
+        <div class="whitespace-nowrap text-xs text-gray-400"><span
+            class="font-mono text-brand-amber text-[11px]">09:42:18</span><span class="ml-2">🔴 RED LANE —
+            QILL-2026-00893 · density_anomaly 91% · physical inspection initiated</span></div>
+        <div class="whitespace-nowrap text-xs text-gray-400"><span
+            class="font-mono text-brand-amber text-[11px]">09:41:55</span><span class="ml-2">✅ AUTO-CLEARED —
+            TCMU-2026-00147 · score 18 · 2m 18s</span></div>
+        <div class="whitespace-nowrap text-xs text-gray-400"><span
+            class="font-mono text-brand-amber text-[11px]">09:40:11</span><span class="ml-2">🤖 MODEL v2.3 · A/B test
+            started · 10% traffic on v2.4</span></div>
+        <div class="whitespace-nowrap text-xs text-gray-400"><span
+            class="font-mono text-brand-amber text-[11px]">09:38:44</span><span class="ml-2">🟡 YELLOW LANE —
+            MUMB-2026-00901 · officer review requested</span></div>
+        <div class="whitespace-nowrap text-xs text-gray-400"><span
+            class="font-mono text-brand-amber text-[11px]">09:35:00</span><span class="ml-2">🔄 TARIFF SYNC — HS 8507
+            weight +15% · Budget 2026 applied</span></div>
+      </div>
+    </div>
     <!-- Predictive Analytics Banner (Bottom) -->
-    <footer class="mt-6 glass-card rounded-3xl p-4 flex items-center justify-between overflow-hidden"
+    <footer class="mt-4 glass-card rounded-3xl p-4 flex items-center justify-between overflow-hidden"
       data-purpose="footer-analytics">
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
@@ -1222,6 +1514,16 @@
               <span class="material-symbols-outlined">check_circle</span>
               <span class="text-sm font-bold uppercase tracking-wider">Approve &amp; Release</span>
             </button>
+            <button onclick="openHeatmapViewer('CNTR-9921-A')"
+              class="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 transition-all">
+              <span class="material-symbols-outlined">radiology</span>
+              <span class="text-sm font-bold uppercase tracking-wider">View X-Ray Analysis</span>
+            </button>
+            <button onclick="openModal('sanctionsModal')"
+              class="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all">
+              <span class="material-symbols-outlined">policy</span>
+              <span class="text-sm font-bold uppercase tracking-wider">Run Sanctions Check</span>
+            </button>
           </div>
           <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -1373,18 +1675,18 @@
       </button>
     </header>
     <!-- Stats -->
-    <div class="grid grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-3 gap-6 mb-8" id="operatorStatsGrid">
       <div class="glass-card p-5 rounded-2xl">
         <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">On Shift</div>
-        <div class="text-3xl font-bold text-green-400">8</div>
+        <div id="opStatOnShift" class="text-3xl font-bold text-green-400">—</div>
       </div>
       <div class="glass-card p-5 rounded-2xl">
         <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Off Duty</div>
-        <div class="text-3xl font-bold text-gray-500">4</div>
+        <div id="opStatOffDuty" class="text-3xl font-bold text-gray-500">—</div>
       </div>
       <div class="glass-card p-5 rounded-2xl">
         <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Avg Cases / Day</div>
-        <div class="text-3xl font-bold text-white">24</div>
+        <div id="opStatAvgCases" class="text-3xl font-bold text-white">—</div>
       </div>
     </div>
     <!-- Roster Table -->
@@ -1400,7 +1702,7 @@
             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Shift</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-white/5">
+        <tbody id="operatorRosterBody" class="divide-y divide-white/5">
           <tr class="hover:bg-white/5">
             <td class="p-4">
               <div class="flex items-center gap-3">
@@ -1493,6 +1795,45 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Override Log -->
+    <div class="glass-card rounded-3xl p-6 mt-6">
+      <div class="text-xs text-gray-400 uppercase tracking-widest mb-4">Override Log — Today</div>
+      <div id="overrideLogBody" class="space-y-3">
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-white">Priya M.</span>
+              <span class="text-xs font-mono text-gray-500">QILL-2026-00341</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-brand-amber/10 text-brand-amber">YELLOW</span>
+              <span class="text-gray-500">→</span>
+              <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-400">RED</span>
+            </div>
+          </div>
+          <div class="text-xs text-gray-400 italic">“Suspicious packaging seen on physical review of adjacent container”
+          </div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-white">Rajan K.</span>
+              <span class="text-xs font-mono text-gray-500">MUMB-2026-00187</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-400">RED</span>
+              <span class="text-gray-500">→</span>
+              <span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-brand-amber/10 text-brand-amber">YELLOW</span>
+            </div>
+          </div>
+          <div class="text-xs text-gray-400 italic">“AI flagged standard industrial equipment — confirmed safe on
+            visual”</div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -1640,6 +1981,154 @@
         </div>
       </div>
     </div>
+
+    <!-- Microservices Status -->
+    <div class="glass-card rounded-3xl overflow-hidden mt-6">
+      <div class="p-5 border-b border-white/5 flex items-center justify-between">
+        <div class="text-xs text-gray-400 uppercase tracking-widest">Microservices Status</div>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_6px_#10B981]"></div><span
+            class="text-xs font-mono text-green-400">7/7 OPERATIONAL</span>
+        </div>
+      </div>
+      <table class="w-full text-left">
+        <thead class="bg-white/5">
+          <tr>
+            <th class="p-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Service</th>
+            <th class="p-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Description</th>
+            <th class="p-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Status</th>
+            <th class="p-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Latency</th>
+            <th class="p-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Uptime</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">vision-svc</td>
+            <td class="p-4 text-xs text-gray-400">YOLOv8 inference + Grad-CAM</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">4.2s</td>
+            <td class="p-4 font-mono text-xs text-green-400">99.97%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">identity-svc</td>
+            <td class="p-4 text-xs text-gray-400">Hyperledger Fabric gateway</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">8.1s</td>
+            <td class="p-4 font-mono text-xs text-green-400">100%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">risk-svc</td>
+            <td class="p-4 text-xs text-gray-400">XGBoost risk scoring</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">1.8s</td>
+            <td class="p-4 font-mono text-xs text-green-400">99.94%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">tariff-sync-svc</td>
+            <td class="p-4 text-xs text-gray-400">CBIC tariff API sync</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">—</td>
+            <td class="p-4 font-mono text-xs text-green-400">99.99%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">ml-monitor-svc</td>
+            <td class="p-4 text-xs text-gray-400">Drift detection + A/B test</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">—</td>
+            <td class="p-4 font-mono text-xs text-green-400">99.91%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">api-gateway</td>
+            <td class="p-4 text-xs text-gray-400">Kong + FastAPI routing</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">12ms</td>
+            <td class="p-4 font-mono text-xs text-green-400">100%</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="p-4 font-mono text-sm text-brand-amber">dashboard-svc</td>
+            <td class="p-4 text-xs text-gray-400">React 18 frontend</td>
+            <td class="p-4"><span
+                class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-green-500/10 text-green-400">●
+                HEALTHY</span></td>
+            <td class="p-4 font-mono text-xs text-white">—</td>
+            <td class="p-4 font-mono text-xs text-green-400">100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tariff Sync Status -->
+    <div class="glass-card rounded-3xl p-6 mt-6">
+      <div class="text-xs text-gray-400 uppercase tracking-widest mb-5">Tariff Sync — Budget 2026-27</div>
+      <div class="grid grid-cols-3 gap-4 mb-5">
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">Last Sync</div>
+          <div class="font-mono text-sm text-green-400">Feb 18 · 06:12 AM</div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">Next Sync</div>
+          <div class="font-mono text-sm text-white">Feb 18 · 12:12 PM</div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">HS Codes Loaded</div>
+          <div class="font-mono text-sm text-white">5,247</div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between items-center py-2 border-b border-white/5">
+          <div class="flex items-center gap-3"><span class="font-mono text-sm text-brand-amber">HS 8507</span><span
+              class="text-xs text-gray-400">Lithium batteries</span></div>
+          <div class="flex items-center gap-3"><span class="text-xs text-red-400 font-mono">+15% risk weight</span><span
+              class="text-[10px] text-gray-500">Feb 18</span></div>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-white/5">
+          <div class="flex items-center gap-3"><span class="font-mono text-sm text-brand-amber">HS 8517</span><span
+              class="text-xs text-gray-400">Telecommunications equipment</span></div>
+          <div class="flex items-center gap-3"><span class="text-xs text-gray-500 font-mono">No change</span><span
+              class="text-[10px] text-gray-500">Feb 18</span></div>
+        </div>
+      </div>
+      <button
+        class="mt-4 px-4 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white text-xs transition-colors">⟳
+        Force Sync Now</button>
+    </div>
+
+    <!-- ML Retraining Queue -->
+    <div class="glass-card rounded-3xl p-6 mt-6">
+      <div class="flex justify-between items-center mb-4">
+        <div class="text-xs text-gray-400 uppercase tracking-widest">ML Retraining Queue</div>
+        <span class="text-xs font-mono text-brand-amber">34/50 samples · triggers at 50</span>
+      </div>
+      <div class="h-2 bg-white/10 rounded-full mb-5 overflow-hidden">
+        <div class="h-full w-[68%] rounded-full bg-gradient-to-r from-green-500 to-brand-amber"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">Current Model</div>
+          <div class="font-mono text-sm text-white">v2.3 · acc 93.1%</div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">A/B Test</div>
+          <div class="font-mono text-sm text-brand-amber">v2.4 · 10% traffic</div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <div class="text-[10px] text-gray-500 mb-1">Next Retrain</div>
+          <div class="font-mono text-sm text-white">16 more samples</div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- ========================================================================== -->
@@ -1687,6 +2176,22 @@
 
   <script>
     // =========================================================================
+    // API CONFIG & UTILS
+    // =========================================================================
+    const API_BASE = window.location.origin;
+
+    async function fetchData(endpoint) {
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`);
+        if (!res.ok) throw new Error(`API Error ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        console.error(`Failed to load ${endpoint}:`, e);
+        return null;
+      }
+    }
+
+    // =========================================================================
     // PAGE NAVIGATION
     // =========================================================================
     let chartsDrawn = false;
@@ -1729,85 +2234,181 @@
       };
       document.title = titles[page] || 'SCANNR PRO';
 
+      // Load Page-Specific Data
+      if (page === 'dashboard') loadDashboardData();
+      if (page === 'livequeue') loadQueueFromAPI();
+      if (page === 'operators') loadOperatorsData();
+      if (page === 'settings') loadSettingsData();
+
       // Draw analytics charts on first visit
-      if (page === 'analytics' && !chartsDrawn) {
-        chartsDrawn = true;
-        setTimeout(drawAnalyticsCharts, 100);
+      if (page === 'analytics') {
+        loadAnalyticsData();
+        if (!chartsDrawn) {
+          chartsDrawn = true;
+          setTimeout(drawAnalyticsCharts, 100);
+        }
       }
 
-      // Fetch live data from risk-svc API
-      if (page === 'livequeue') loadQueueFromAPI();
       if (page === 'detail' && window._activeContainerId) {
         loadContainerDetail(window._activeContainerId);
       }
     }
 
     // =========================================================================
-    // API BASE URL
+    // LOADING DATA HANDLERS
     // =========================================================================
-    const API_BASE = window.location.origin;
 
-    // =========================================================================
-    // LIVE QUEUE — Fetch from /api/queue
-    // =========================================================================
+    // --- Dashboard ---
+    async function loadDashboardData() {
+      const data = await fetchData('/api/dashboard/stats');
+      if (data && data.active_alerts) {
+        const badge = document.getElementById('alertBadgeTop');
+        if (badge) badge.textContent = data.active_alerts;
+      }
+      const activityData = await fetchData('/api/dashboard/activity');
+      if (activityData && activityData.events) {
+        const feed = document.getElementById('activityFeedContainer');
+        if (feed) {
+          feed.innerHTML = activityData.events.map(e => `
+            <div class="whitespace-nowrap text-xs text-gray-400">
+              <span class="font-mono text-brand-amber text-[11px]">\${e.time}</span>
+              <span class="ml-2">\${e.message}</span>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    // --- Queue ---
     async function loadQueueFromAPI() {
       const tbody = document.getElementById('queueTableBody');
       if (!tbody) return;
-      try {
-        const res = await fetch(API_BASE + '/api/queue');
-        if (!res.ok) throw new Error('API unavailable');
-        const data = await res.json();
-        showToast('Queue synced from risk-svc API', 'success');
+      const data = await fetchData('/api/queue');
+      if (!data) return;
 
-        // Rebuild table rows
-        tbody.innerHTML = '';
-        data.containers.forEach(c => {
-          const riskLevel = c.lane === 'RED' ? 'high' : c.lane === 'YELLOW' ? 'medium' : 'low';
-          const riskColor = c.lane === 'RED' ? 'brand-red' : c.lane === 'YELLOW' ? 'brand-amber' : 'green-500';
-          const statusLabel = c.lane === 'RED' ? 'Flagged' : c.lane === 'YELLOW' ? 'Review' : 'Cleared';
-          const statusClass = c.lane === 'RED'
-            ? 'bg-brand-red/10 text-brand-red border-brand-red/20'
-            : c.lane === 'YELLOW'
-              ? 'bg-brand-amber/10 text-brand-amber border-brand-amber/20'
-              : 'bg-green-500/10 text-green-500 border-green-500/20';
-          const btnClass = c.lane === 'RED'
-            ? 'bg-brand-red hover:bg-red-600 text-white shadow-lg shadow-red-900/20'
-            : c.lane === 'YELLOW'
-              ? 'bg-brand-amber hover:bg-amber-600 text-black shadow-lg shadow-amber-900/20'
-              : 'bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white border border-white/10';
-          const btnLabel = c.lane === 'RED' || c.lane === 'YELLOW' ? 'Investigate' : 'Archive';
-          const barGrad = c.lane === 'RED'
-            ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
-            : c.lane === 'YELLOW'
-              ? 'bg-brand-amber'
-              : 'bg-green-500';
-          const scoreLabel = c.lane === 'RED' ? c.risk_score + '% Critical'
-            : c.lane === 'YELLOW' ? c.risk_score + '% Elevated'
-              : c.risk_score + '% Low';
+      tbody.innerHTML = '';
+      data.containers.forEach(c => {
+        const riskLevel = c.lane === 'RED' ? 'high' : c.lane === 'YELLOW' ? 'medium' : 'low';
+        // Using logic specific to the demo data structure
+        const statusClass = c.lane === 'RED'
+          ? 'bg-brand-red/10 text-brand-red border-brand-red/20'
+          : c.lane === 'YELLOW'
+            ? 'bg-brand-amber/10 text-brand-amber border-brand-amber/20'
+            : 'bg-green-500/10 text-green-500 border-green-500/20';
 
-          const avatarColors = { JD: 'bg-gray-700', AI: 'bg-indigo-600', JS: 'bg-pink-700', MK: 'bg-purple-600', DC: 'bg-blue-600' };
-          const avColor = avatarColors[c.operator] || 'bg-gray-600';
+        const btnClass = c.lane === 'RED' || c.lane === 'YELLOW'
+          ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+          : 'bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white border border-white/10';
 
-          const row = document.createElement('tr');
-          row.className = 'hover:bg-white/5 transition-colors group';
-          row.innerHTML = `
-            <td class="p-4"><div class="flex flex-col"><span class="font-mono text-sm font-bold text-white group-hover:text-brand-accent transition-colors">${c.id}</span><span class="text-[10px] text-gray-500">${c.type}</span></div></td>
-            <td class="p-4"><div class="flex items-center gap-2"><span class="text-lg">${c.flag}</span><span class="text-sm text-gray-300">${c.origin}</span></div></td>
-            <td class="p-4"><span data-risk="${riskLevel}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${statusClass} border"><span class="w-1.5 h-1.5 rounded-full bg-${riskColor}"></span>${statusLabel}</span></td>
-            <td class="p-4"><div class="w-full max-w-[200px]"><div class="flex justify-between text-[10px] mb-1"><span class="text-${riskColor} font-bold">${scoreLabel}</span></div><div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="${barGrad} h-full rounded-full" style="width:${c.risk_score}%"></div></div></div></td>
-            <td class="p-4"><div class="flex -space-x-2 overflow-hidden"><div class="w-8 h-8 rounded-full ${avColor} flex items-center justify-center text-[10px] text-white ring-2 ring-[#161618]">${c.operator}</div></div></td>
-            <td class="p-4 text-right"><button class="${btnClass} text-xs font-bold py-1.5 px-4 rounded-lg transition-all" onclick="window._activeContainerId='${c.id}'; switchPage('detail')">${btnLabel}</button></td>
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/5 transition-colors group cursor-pointer border-b border-white/5 last:border-0';
+        row.onclick = (e) => {
+          if (!e.target.closest('button')) {
+            window._activeContainerId = c.id;
+            switchPage('detail');
+          }
+        };
+
+        row.innerHTML = `
+            <td class="p-4 font-mono text-xs text-brand-accent">\${c.id}</td>
+            <td class="p-4">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full \${c.time_in_queue > 60 ? 'bg-red-500' : 'bg-green-500'}"></span>
+                <span class="text-xs text-gray-300 font-medium">\${c.eta}</span>
+              </div>
+            </td>
+            <td class="p-4">
+               <div class="flex items-center gap-2" data-risk="\${riskLevel}">
+                  <div class="h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
+                    <div class="h-full \${c.lane === 'RED' ? 'bg-brand-red' : c.lane === 'YELLOW' ? 'bg-brand-amber' : 'bg-green-500'}" style="width: \${c.risk_score}%"></div>
+                  </div>
+                  <span class="text-xs font-bold \${c.lane === 'RED' ? 'text-brand-red' : c.lane === 'YELLOW' ? 'text-brand-amber' : 'text-green-400'}">\${c.risk_score}%</span>
+               </div>
+            </td>
+            <td class="p-4 text-xs text-gray-400">\${c.origin}</td>
+            <td class="p-4 text-xs text-white">\${c.commodity}</td>
+            <td class="p-4">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded border \${statusClass}">\${c.lane}</span>
+            </td>
+            <td class="p-4 text-right">
+              <button onclick="window._activeContainerId='\${c.id}'; switchPage('detail')" class="px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors \${btnClass}">
+                View
+              </button>
+            </td>
           `;
-          tbody.appendChild(row);
-        });
+        tbody.appendChild(row);
+      });
+      showToast('Queue synced from risk-svc API', 'success');
 
-        // Update count
-        const countEl = document.querySelector('[data-purpose="livequeue-content-layout"] .text-xs.text-gray-500');
-        if (countEl) countEl.innerHTML = `Showing <span class="text-white font-bold">1-${data.total}</span> of <span class="text-white font-bold">${data.total}</span> active containers`;
+      const countEl = document.querySelector('[data-purpose="livequeue-content-layout"] .text-xs.text-gray-500');
+      if (countEl) countEl.innerHTML = `Showing <span class="text-white font-bold">1-\${data.total}</span> of <span class="text-white font-bold">\${data.total}</span> active containers`;
+    }
 
-      } catch (e) {
-        console.warn('API unavailable, using static HTML:', e.message);
+    // --- Operators ---
+    async function loadOperatorsData() {
+      const data = await fetchData('/api/operators');
+      if (!data) return;
+
+      if (data.stats) {
+        document.getElementById('opStatOnShift').textContent = data.stats.on_shift;
+        document.getElementById('opStatOffDuty').textContent = data.stats.total - data.stats.on_shift;
+        document.getElementById('opStatAvgCases').textContent = data.stats.avg_cases;
       }
+
+      const tbody = document.getElementById('operatorRosterBody');
+      if (tbody && data.operators) {
+        tbody.innerHTML = data.operators.map(op => `
+              <tr class="hover:bg-white/5 \${op.status === 'Off Duty' ? 'opacity-50' : ''}">
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full \${op.color || 'bg-gray-600'} flex items-center justify-center text-white text-[10px] font-bold">\${op.initials}</div>
+                    <span class="text-sm \${op.status === 'Off Duty' ? 'text-gray-400' : 'text-white'} font-medium">\${op.name}</span>
+                  </div>
+                </td>
+                <td class="p-4 text-sm \${op.status === 'Off Duty' ? 'text-gray-500' : 'text-gray-300'}">\${op.role}</td>
+                <td class="p-4">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full \${op.status === 'On Shift' ? 'text-green-400 bg-green-500/10' : 'text-gray-500 bg-white/5'}">\${op.status}</span>
+                </td>
+                <td class="p-4 text-sm \${op.status === 'Off Duty' ? 'text-gray-500' : 'text-white font-bold'}">\${op.assigned || '—'}</td>
+                <td class="p-4 text-sm \${op.status === 'Off Duty' ? 'text-gray-500' : 'text-brand-neon'}">\${op.accuracy}%</td>
+                <td class="p-4 text-sm text-gray-400 text-right">\${op.shift}</td>
+              </tr>
+            `).join('');
+      }
+
+      const overridesData = await fetchData('/api/overrides');
+      if (overridesData && overridesData.overrides) {
+        const logBody = document.getElementById('overrideLogBody');
+        if (logBody) {
+          logBody.innerHTML = overridesData.overrides.map(ov => `
+                    <div class="bg-white/5 rounded-xl p-4">
+                      <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                          <span class="text-sm font-bold text-white">\${ov.officer_name}</span>
+                          <span class="text-xs font-mono text-gray-500">\${ov.container_id}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded \${ov.original_lane === 'RED' ? 'bg-red-500/10 text-red-400' : 'bg-brand-amber/10 text-brand-amber'}">\${ov.original_lane}</span>
+                          <span class="text-gray-500">→</span>
+                          <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded \${ov.final_lane === 'RED' ? 'bg-red-500/10 text-red-400' : 'bg-brand-amber/10 text-brand-amber'}">\${ov.final_lane}</span>
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-400 italic">“\${ov.reason}”</div>
+                    </div>
+                `).join('');
+        }
+      }
+    }
+
+    // --- Settings ---
+    async function loadSettingsData() {
+      const servicesData = await fetchData('/api/services');
+      const settingsData = await fetchData('/api/settings');
+    }
+
+    // --- Analytics ---
+    async function loadAnalyticsData() {
+      const data = await fetchData('/api/analytics');
     }
 
     // =========================================================================
@@ -1921,6 +2522,92 @@
       const counter = document.getElementById('charCount');
       if (textarea && counter) counter.textContent = textarea.value.length + '/500';
     }
+
+    // =========================================================================
+    // GENERIC MODAL OPEN/CLOSE
+    // =========================================================================
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // =========================================================================
+    // INITIATE CLEARANCE
+    // =========================================================================
+    function submitClearance() {
+      const modal = document.getElementById('initiateModal');
+      const formDiv = modal.querySelector('.p-6:last-child');
+      formDiv.innerHTML = `
+        <div class="py-12 text-center">
+          <div class="text-4xl mb-3">🚀</div>
+          <div class="text-base font-bold text-green-400">Clearance Initiated</div>
+          <div class="text-xs text-gray-500 mt-2">Container added to processing queue</div>
+        </div>`;
+      showToast('Container submitted for clearance processing', 'success');
+      setTimeout(() => closeModal('initiateModal'), 2000);
+    }
+
+    // =========================================================================
+    // IMPORTER LOOKUP
+    // =========================================================================
+    function lookupImporter() {
+      const result = document.getElementById('importerResult');
+      if (result) {
+        result.classList.remove('hidden');
+        showToast('Blockchain record verified — Trust score: 88', 'success');
+      }
+    }
+
+    // =========================================================================
+    // SANCTIONS CHECK
+    // =========================================================================
+    function runSanctionsCheck() {
+      const result = document.getElementById('sanctionsResult');
+      if (result) {
+        result.classList.remove('hidden');
+        showToast('Entity cleared across all 5 sanction databases', 'success');
+      }
+    }
+
+    // =========================================================================
+    // HEATMAP VIEWER — VIEW TOGGLE
+    // =========================================================================
+    function setHeatmapView(view) {
+      const xray = document.getElementById('xrayPanel');
+      const heatmap = document.getElementById('heatmapPanel');
+      const tabs = document.querySelectorAll('.heatmap-tab');
+      tabs.forEach(tab => {
+        const isActive = tab.getAttribute('data-view') === view || (view === 'split' && true);
+        tab.className = `heatmap-tab px-4 py-2 rounded-lg text-xs font-medium ${tab.getAttribute('data-view') === view
+          ? 'bg-blue-600/20 border border-blue-600/40 text-blue-400'
+          : 'bg-white/5 border border-white/10 text-gray-400'
+          }`;
+      });
+      if (view === 'heatmap') { xray.classList.add('hidden'); heatmap.classList.remove('hidden'); }
+      else if (view === 'xray') { xray.classList.remove('hidden'); heatmap.classList.add('hidden'); }
+      else { xray.classList.remove('hidden'); heatmap.classList.remove('hidden'); }
+    }
+
+    function openHeatmapViewer(containerId) {
+      document.getElementById('heatmapContainerId').textContent = containerId || 'CNTR-9921-A';
+      openModal('heatmapModal');
+    }
+
+    // =========================================================================
+    // LIVE CLOCK
+    // =========================================================================
+    function updateClock() {
+      const el = document.getElementById('liveClockDash');
+      if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+          + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
     // =========================================================================
     // LIVE QUEUE SEARCH & FILTER
