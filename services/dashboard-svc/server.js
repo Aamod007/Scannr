@@ -1,13 +1,18 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const http = require('http');
-const fs = require('fs');
-const { WebSocketServer } = require('ws');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import http from 'http';
+import fs from 'fs';
+import { WebSocketServer } from 'ws';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-const uiPath = path.resolve(__dirname, 'src', 'index.html');
+// We now serve the built Vite React app from dist
+const uiPath = path.resolve(__dirname, 'dist', 'index.html');
 
 // Microservice URLs (Docker: service names, local: localhost ports)
 const VISION_URL = process.env.VISION_SVC_URL || 'http://localhost:8001';
@@ -17,6 +22,9 @@ const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:8000';
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static assets from the Vite build directory
+app.use(express.static(path.resolve(__dirname, 'dist')));
 
 // ── Proxy helper: forward request to a microservice with fallback ──
 function fetchService(url, options = {}) {

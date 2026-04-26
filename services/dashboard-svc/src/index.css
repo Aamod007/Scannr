@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --color-brand-dark: #0A0A0A;
+  --color-brand-card: #161618;
+  --color-brand-accent: #3B82F6;
+  --color-brand-neon: #00F2FF;
+  --color-brand-amber: #F59E0B;
+  --color-brand-red: #EF4444;
+  --color-brand-green: #10B981;
+}
+
+body {
+  background-color: var(--color-brand-dark);
+  color: #D1D5DB; /* gray-300 */
+}
+
+.glass-card {
+  background: rgba(22, 22, 24, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hexagon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+  mask-image: radial-gradient(circle, black 60%, transparent 100%);
+}
+
+.hex {
+  width: 24px;
+  height: 27.71px;
+  background-color: #1a1a1c;
+  margin: 1px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: all 0.3s ease;
+}
+
+.hex:hover {
+  transform: scale(1.1);
+  filter: brightness(1.5);
+}
+
+.hex-blue-light { background-color: #1e3a8a; }
+.hex-blue-med { background-color: #2563eb; }
+.hex-blue-bright { background-color: #60a5fa; box-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+.hex-neon { background-color: #00F2FF; box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+.glow-text-neon { text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+.glow-pill-red { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+.glow-pill-green { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+.glow-pill-amber { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+
+.page-view { transition: opacity 0.25s ease; }
+.page-view.hidden { display: none; }
+
+.circular-chart { display: block; margin: 0 auto; max-width: 100%; max-height: 250px; }
+.circle-bg { fill: none; stroke: #333; stroke-width: 2.5; }
+.circle { fill: none; stroke-width: 2.5; stroke-linecap: round; animation: progress 1s ease-out forwards; }
+@keyframes progress { 0% { stroke-dasharray: 0 100; } }
+.percentage { fill: #fff; font-family: 'Inter', sans-serif; font-weight: bold; font-size: 0.5em; text-anchor: middle; }
+
+.grad-cam-overlay { background: radial-gradient(circle at 70% 60%, rgba(239, 68, 68, 0.6) 0%, rgba(245, 158, 11, 0.4) 25%, transparent 60%); mix-blend-mode: color-dodge; }
+
+.scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #00F2FF; box-shadow: 0 0 15px #00F2FF; animation: scan 3s linear infinite; opacity: 0.7; }
+@keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
