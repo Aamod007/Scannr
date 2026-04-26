@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-const uiPath = path.resolve(__dirname, '..', '..', 'code.html');
+const uiPath = path.resolve(__dirname, 'src', 'index.html');
 
 // Microservice URLs (Docker: service names, local: localhost ports)
 const VISION_URL = process.env.VISION_SVC_URL || 'http://localhost:8001';
@@ -147,7 +147,12 @@ const SETTINGS = {
 const ANALYTICS = {
   total_scans: 0,
   lane_distribution: { green: 0, yellow: 0, red: 0 },
-  weekly_volumes: [],
+  weekly_volumes: [
+    { day: 'Mon', count: 0 }, { day: 'Tue', count: 0 },
+    { day: 'Wed', count: 0 }, { day: 'Thu', count: 0 },
+    { day: 'Fri', count: 0 }, { day: 'Sat', count: 0 },
+    { day: 'Sun', count: 0 },
+  ],
   risk_by_origin: [],
   ai_accuracy_trend: [],
   clearance_volume_trend: [],
@@ -158,7 +163,7 @@ const DASHBOARD_STATS = {
   throughput: 0,
   containers_today: 0,
   avg_clearance_time: '0s',
-  ai_accuracy: 99.8,
+  ai_accuracy: 0,
   active_alerts: 0,
   green_lane_pct: 0,
   red_lane_count: 0,

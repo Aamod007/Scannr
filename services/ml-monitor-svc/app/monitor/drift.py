@@ -66,34 +66,43 @@ def detect_drift(
     """Run drift detection across all tracked features.
 
     Args:
-        recent_features: Optional new recent data. If None, uses synthetic demo data.
+        recent_features: Optional new recent data. If None, uses stored recent data.
 
     Returns:
         Drift report with per-feature KS test results and PSI.
+
+    Raises:
+        ValueError: If no baseline has been set via set_baseline().
     """
     global _recent
 
-    # If no baseline yet, generate synthetic demo baseline
+    # Require real baseline data — no synthetic fallback
     if not _baseline:
-        rng = np.random.RandomState(42)
-        _baseline["blockchain_trust_score"] = rng.normal(70, 15, 500)
-        _baseline["vision_confidence"] = rng.uniform(0, 1, 500)
-        _baseline["cargo_declared_value_log"] = rng.normal(14, 2, 500)
-        _baseline["route_origin_risk_index"] = rng.uniform(0, 10, 500)
-        _baseline["risk_score"] = rng.normal(30, 20, 500)
+        return {
+            "drift_detected": False,
+            "error": "No baseline data set. POST feature distributions to /baseline first.",
+            "feature_reports": {},
+            "ks_threshold": KS_THRESHOLD,
+            "psi_threshold": PSI_THRESHOLD,
+            "alert": False,
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
 
     # Set recent data if provided
     if recent_features:
         set_recent(recent_features)
 
-    # If no recent data, generate slightly shifted synthetic data
+    # Require real recent data
     if not _recent:
-        rng = np.random.RandomState(99)
-        _recent["blockchain_trust_score"] = rng.normal(68, 16, 200)
-        _recent["vision_confidence"] = rng.uniform(0, 1, 200)
-        _recent["cargo_declared_value_log"] = rng.normal(14.2, 2.1, 200)
-        _recent["route_origin_risk_index"] = rng.uniform(0, 10, 200)
-        _recent["risk_score"] = rng.normal(32, 22, 200)
+        return {
+            "drift_detected": False,
+            "error": "No recent data available. Submit recent feature distributions first.",
+            "feature_reports": {},
+            "ks_threshold": KS_THRESHOLD,
+            "psi_threshold": PSI_THRESHOLD,
+            "alert": False,
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
 
     from scipy.stats import ks_2samp
 
