@@ -12,7 +12,7 @@ from app.preprocess.xray_pipeline import preprocess_xray
 from pydantic import BaseModel
 
 # Metrics — lightweight, zero-dependency Prometheus exporter
-import sys, os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
 try:
     from metrics import get_metrics_route, setup_metrics as _setup_metrics

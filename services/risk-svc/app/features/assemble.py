@@ -177,6 +177,5 @@ def update_hs_risk_weights(new_weights: Dict[str, float]) -> None:
 
     Called when tariff-sync-svc detects an update from CBIC API.
     """
-    global HS_RISK_WEIGHTS
     HS_RISK_WEIGHTS.update(new_weights)
     logger.info(f"Updated {len(new_weights)} HS risk weights")

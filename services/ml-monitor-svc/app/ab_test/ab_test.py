@@ -46,7 +46,7 @@ def start_ab_test(
         "results_a": [],
         "results_b": [],
     }
-    logger.info(f"A/B test started: {model_a_version} ({100-traffic_split}%) vs {model_b_version} ({traffic_split}%)")
+    logger.info(f"A/B test started: {model_a_version} ({100 - traffic_split}%) vs {model_b_version} ({traffic_split}%)")
     return _ab_state
 
 
@@ -118,7 +118,7 @@ def ab_compare() -> Dict[str, Any]:
         n_b = b_eval
 
         p_pool = (metrics_a["correct"] + metrics_b["correct"]) / (n_a + n_b)
-        se = np.sqrt(p_pool * (1 - p_pool) * (1/n_a + 1/n_b))
+        se = np.sqrt(p_pool * (1 - p_pool) * (1 / n_a + 1 / n_b))
 
         if se > 0:
             z = (p_b - p_a) / se
@@ -159,7 +159,6 @@ def ab_compare() -> Dict[str, Any]:
 
 def stop_ab_test() -> Dict[str, Any]:
     """Stop the current A/B test."""
-    global _ab_state
     result = ab_compare()
     _ab_state["active"] = False
     result["status"] = "stopped"

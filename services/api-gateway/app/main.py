@@ -20,7 +20,7 @@ from app.bridge.mha import MHASanctionsFeed
 from app.db.connection import get_db_pool
 
 # Metrics — lightweight, zero-dependency Prometheus exporter
-import sys, os
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
 try:
     from metrics import get_metrics_route, setup_metrics as _setup_metrics

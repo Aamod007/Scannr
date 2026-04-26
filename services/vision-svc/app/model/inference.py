@@ -131,8 +131,6 @@ def generate_gradcam_heatmap(
         cam_image = show_cam_on_image(img_float, grayscale_cam, use_rgb=True)
 
         # Draw detection bounding boxes on top
-        h_scale = image.shape[0] / 640
-        w_scale = image.shape[1] / 640
         cam_bgr = cv2.cvtColor(cam_image, cv2.COLOR_RGB2BGR)
         cam_bgr = cv2.resize(cam_bgr, (image.shape[1], image.shape[0]))
 

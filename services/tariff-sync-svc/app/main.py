@@ -105,7 +105,6 @@ async def _get_db_pool():
 
 async def _update_tariff_table(tariffs: List[Dict]) -> Dict[str, Any]:
     """Upsert tariff_risk_weights table and return the diff."""
-    global _current_weights
 
     changes = []
     try:

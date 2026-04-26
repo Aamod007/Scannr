@@ -13,7 +13,8 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 # Metrics — lightweight, zero-dependency Prometheus exporter
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
 try:
     from metrics import get_metrics_route, setup_metrics as _setup_metrics

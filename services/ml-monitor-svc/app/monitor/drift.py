@@ -44,7 +44,6 @@ def set_baseline(features: Dict[str, List[float]]) -> Dict[str, Any]:
     Returns:
         Confirmation with statistics.
     """
-    global _baseline
     stats = {}
     for name, values in features.items():
         arr = np.array(values, dtype=np.float64)
@@ -55,7 +54,6 @@ def set_baseline(features: Dict[str, List[float]]) -> Dict[str, Any]:
 
 def set_recent(features: Dict[str, List[float]]) -> None:
     """Set recent feature distributions for drift comparison."""
-    global _recent
     for name, values in features.items():
         _recent[name] = np.array(values, dtype=np.float64)
 
@@ -74,7 +72,6 @@ def detect_drift(
     Raises:
         ValueError: If no baseline has been set via set_baseline().
     """
-    global _recent
 
     # Require real baseline data — no synthetic fallback
     if not _baseline:

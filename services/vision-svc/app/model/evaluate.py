@@ -48,9 +48,9 @@ def evaluate_model(
         mlflow.log_metric("val_precision", precision)
         mlflow.log_metric("val_recall", recall)
     except Exception:
-        pass # MLflow might not be active
+        pass  # MLflow might not be active
 
-    print(f"Evaluation Results:")
+    print("Evaluation Results:")
     print(f"mAP50: {map50:.4f}")
     print(f"mAP50-95: {map50_95:.4f}")
     print(f"Precision: {precision:.4f}")
@@ -62,6 +62,8 @@ def evaluate_model(
         "precision": precision,
         "recall": recall
     }
+
+
 
 if __name__ == "__main__":
     # Example usage
