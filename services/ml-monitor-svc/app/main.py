@@ -12,6 +12,15 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
+# Metrics — lightweight, zero-dependency Prometheus exporter
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+try:
+    from metrics import get_metrics_route, setup_metrics as _setup_metrics
+    _HAS_METRICS = True
+except ImportError:
+    _HAS_METRICS = False
+
 from app.monitor.drift import detect_drift, set_baseline
 from app.ab_test.ab_test import ab_compare, start_ab_test, stop_ab_test, record_result
 from app.mlflow.registry import (
@@ -134,22 +143,28 @@ async def registry_production(request: Request):
     return JSONResponse({"error": f"No production model for {name}"}, status_code=404)
 
 
-app = Starlette(
-    routes=[
-        Route("/health", health, methods=["GET"]),
-        # Drift
-        Route("/drift", drift_report, methods=["GET"]),
-        Route("/drift/baseline", drift_baseline, methods=["POST"]),
-        Route("/drift/check", drift_check, methods=["POST"]),
-        # A/B Testing
-        Route("/ab", ab_report, methods=["GET"]),
-        Route("/ab/start", ab_start, methods=["POST"]),
-        Route("/ab/stop", ab_stop, methods=["POST"]),
-        Route("/ab/record", ab_record, methods=["POST"]),
-        # Registry
-        Route("/registry", registry_list, methods=["GET"]),
-        Route("/registry", registry_register, methods=["POST"]),
-        Route("/registry/promote", registry_promote, methods=["POST"]),
-        Route("/registry/production/{name}", registry_production, methods=["GET"]),
-    ]
-)
+_routes = [
+    Route("/health", health, methods=["GET"]),
+    # Drift
+    Route("/drift", drift_report, methods=["GET"]),
+    Route("/drift/baseline", drift_baseline, methods=["POST"]),
+    Route("/drift/check", drift_check, methods=["POST"]),
+    # A/B Testing
+    Route("/ab", ab_report, methods=["GET"]),
+    Route("/ab/start", ab_start, methods=["POST"]),
+    Route("/ab/stop", ab_stop, methods=["POST"]),
+    Route("/ab/record", ab_record, methods=["POST"]),
+    # Registry
+    Route("/registry", registry_list, methods=["GET"]),
+    Route("/registry", registry_register, methods=["POST"]),
+    Route("/registry/promote", registry_promote, methods=["POST"]),
+    Route("/registry/production/{name}", registry_production, methods=["GET"]),
+]
+
+if _HAS_METRICS:
+    _routes.append(get_metrics_route())
+
+app = Starlette(routes=_routes)
+
+if _HAS_METRICS:
+    _setup_metrics(app, service_name="ml-monitor-svc")

@@ -19,6 +19,15 @@ from app.bridge.icegate import ICEGATEBridge
 from app.bridge.mha import MHASanctionsFeed
 from app.db.connection import get_db_pool
 
+# Metrics — lightweight, zero-dependency Prometheus exporter
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+try:
+    from metrics import get_metrics_route, setup_metrics as _setup_metrics
+    _HAS_METRICS = True
+except ImportError:
+    _HAS_METRICS = False
+
 IDENTITY_SVC_URL = os.getenv("IDENTITY_SVC_URL", "http://identity-svc:8000")
 
 
@@ -287,23 +296,31 @@ async def ws_stats(websocket: WebSocket):
 
 # ─── Application ─────────────────────────────────────────────────────
 
-app = Starlette(
-    routes=[
-        # Core
-        Route("/health", health, methods=["GET"]),
-        Route("/clearance/initiate", clearance_initiate, methods=["POST"]),
-        Route("/clearance/{clearance_id}/result", clearance_result_handler, methods=["GET"]),
-        Route("/officer/override", officer_override_handler, methods=["POST"]),
-        # Dashboard
-        Route("/dashboard/stats", dashboard_stats, methods=["GET"]),
-        # Blockchain / identity
-        Route("/blockchain/importer/register", blockchain_register_importer, methods=["POST"]),
-        Route("/blockchain/importer/{gstin}/profile", blockchain_importer_profile, methods=["GET"]),
-        # ICEGATE bridge
-        Route("/icegate/manifest/{bill_no}", icegate_manifest, methods=["GET"]),
-        # Sanctions
-        Route("/sanctions/check", sanctions_check, methods=["POST"]),
-        # WebSocket
-        WebSocketRoute("/ws/stats", ws_stats),
-    ]
-)
+_routes = [
+    # Core
+    Route("/health", health, methods=["GET"]),
+    Route("/clearance/initiate", clearance_initiate, methods=["POST"]),
+    Route("/clearance/{clearance_id}/result", clearance_result_handler, methods=["GET"]),
+    Route("/officer/override", officer_override_handler, methods=["POST"]),
+    # Dashboard
+    Route("/dashboard/stats", dashboard_stats, methods=["GET"]),
+    # Blockchain / identity
+    Route("/blockchain/importer/register", blockchain_register_importer, methods=["POST"]),
+    Route("/blockchain/importer/{gstin}/profile", blockchain_importer_profile, methods=["GET"]),
+    # ICEGATE bridge
+    Route("/icegate/manifest/{bill_no}", icegate_manifest, methods=["GET"]),
+    # Sanctions
+    Route("/sanctions/check", sanctions_check, methods=["POST"]),
+    # WebSocket
+    WebSocketRoute("/ws/stats", ws_stats),
+]
+
+# Add Prometheus /metrics endpoint if available
+if _HAS_METRICS:
+    _routes.append(get_metrics_route())
+
+app = Starlette(routes=_routes)
+
+# Register metrics middleware
+if _HAS_METRICS:
+    _setup_metrics(app, service_name="api-gateway")

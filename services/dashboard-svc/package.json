@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node -e \"console.log('Static UI: no build step')\"",
+    "build": "echo 'Dashboard serves static index.html — no build step required'",
     "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "ws": "^8.16.0"
   }
 }

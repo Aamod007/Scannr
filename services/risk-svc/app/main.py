@@ -6,6 +6,15 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
+# Metrics — lightweight, zero-dependency Prometheus exporter
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+try:
+    from metrics import get_metrics_route, setup_metrics as _setup_metrics
+    _HAS_METRICS = True
+except ImportError:
+    _HAS_METRICS = False
+
 from app.features.assemble import assemble_features, update_hs_risk_weights
 from app.model.predict import predict_risk
 from app.model.train import train_model
@@ -67,14 +76,20 @@ async def update_weights(request: Request):
     return JSONResponse({"status": "updated", "count": len(payload.get("weights", {}))})
 
 
-app = Starlette(
-    routes=[
-        Route("/health", health, methods=["GET"]),
-        Route("/score", score, methods=["POST"]),
-        Route("/train", train, methods=["POST"]),
-        Route("/evaluate", evaluate, methods=["GET"]),
-        Route("/retrain", retrain, methods=["POST"]),
-        Route("/spike", spike_check, methods=["POST"]),
-        Route("/weights", update_weights, methods=["POST"]),
-    ]
-)
+_routes = [
+    Route("/health", health, methods=["GET"]),
+    Route("/score", score, methods=["POST"]),
+    Route("/train", train, methods=["POST"]),
+    Route("/evaluate", evaluate, methods=["GET"]),
+    Route("/retrain", retrain, methods=["POST"]),
+    Route("/spike", spike_check, methods=["POST"]),
+    Route("/weights", update_weights, methods=["POST"]),
+]
+
+if _HAS_METRICS:
+    _routes.append(get_metrics_route())
+
+app = Starlette(routes=_routes)
+
+if _HAS_METRICS:
+    _setup_metrics(app, service_name="risk-svc")

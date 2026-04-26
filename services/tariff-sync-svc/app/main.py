@@ -19,6 +19,15 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
+# Metrics — lightweight, zero-dependency Prometheus exporter
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+try:
+    from metrics import get_metrics_route, setup_metrics as _setup_metrics
+    _HAS_METRICS = True
+except ImportError:
+    _HAS_METRICS = False
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -270,12 +279,20 @@ async def on_startup():
         logger.warning(f"Initial sync failed (non-fatal): {e}")
 
 
+_routes = [
+    Route("/health", health, methods=["GET"]),
+    Route("/sync", sync_now, methods=["POST"]),
+    Route("/tariffs", list_tariffs, methods=["GET"]),
+    Route("/tariffs/{hs_code}", get_tariff, methods=["GET"]),
+]
+
+if _HAS_METRICS:
+    _routes.append(get_metrics_route())
+
 app = Starlette(
-    routes=[
-        Route("/health", health, methods=["GET"]),
-        Route("/sync", sync_now, methods=["POST"]),
-        Route("/tariffs", list_tariffs, methods=["GET"]),
-        Route("/tariffs/{hs_code}", get_tariff, methods=["GET"]),
-    ],
+    routes=_routes,
     on_startup=[on_startup],
 )
+
+if _HAS_METRICS:
+    _setup_metrics(app, service_name="tariff-sync-svc")

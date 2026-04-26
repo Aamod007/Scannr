@@ -1,5 +1,6 @@
 import express from "express"
 import { queryImporter, registerImporter, addViolation } from "./importer.js"
+import { connectFabricGateway, disconnectFabricGateway } from "./connection.js"
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -10,6 +11,10 @@ const app = express()
 const port = process.env.PORT || 8000
 
 app.use(express.json())
+
+// ── Fabric connection (initialized at startup) ──
+let fabricConnection = null
+let fabricStatus = "initializing"
 
 // ── Blockchain transaction ledger (simulated) ──
 const ledger = []
@@ -28,6 +33,12 @@ function logTransaction(txType, data) {
   return tx
 }
 
+// ── Metrics counters ──
+let queryCount = 0
+let registerCount = 0
+let violationCount = 0
+let requestCount = 0
+
 // ── Pre-load sample importers on startup ──
 const sampleImporters = [
   { importer_id: "27AABCU9603R1ZN", name: "TechCorp India Pvt. Ltd.", years_active: 7, aeo_tier: 1, violations: 0, clean_inspections: 47, sector: "electronics", state: "Maharashtra" },
@@ -44,9 +55,6 @@ const sampleImporters = [
   { importer_id: "08AABCG1234T1Z5", name: "Rajasthan Stone Exports", years_active: 12, aeo_tier: 1, violations: 1, clean_inspections: 134, sector: "minerals", state: "Rajasthan" },
 ]
 
-// In-memory store reference for pre-loading
-const preloadStore = new Map()
-
 async function preloadImporters() {
   console.log(`\n🔗 Pre-loading ${sampleImporters.length} importers into blockchain ledger...`)
   for (const imp of sampleImporters) {
@@ -61,19 +69,58 @@ async function preloadImporters() {
   console.log(`   Ledger: ${ledger.length} transactions recorded\n`)
 }
 
+// ── Request counter middleware ──
+app.use((req, res, next) => {
+  requestCount++
+  next()
+})
+
 // ── Health check ──
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     service: "identity-svc",
     blockchain: {
-      network: "Hyperledger Fabric v2.5 (simulated)",
+      network: fabricConnection && !fabricConnection.stub
+        ? "Hyperledger Fabric v2.5 (live)"
+        : "Hyperledger Fabric v2.5 (simulated)",
+      mode: fabricConnection && !fabricConnection.stub ? "fabric" : "in-memory",
       channel: "india-customs-main",
       chaincode: "importer",
       organizations: ["CustomsOrg", "PortAuthorityOrg"],
       ledger_height: ledger.length,
+      fabric_status: fabricStatus,
     },
   })
+})
+
+// ── Prometheus metrics endpoint ──
+app.get("/metrics", (req, res) => {
+  res.set("Content-Type", "text/plain")
+  res.send([
+    "# HELP identity_queries_total Total importer queries",
+    "# TYPE identity_queries_total counter",
+    `identity_queries_total ${queryCount}`,
+    "# HELP identity_registrations_total Total importer registrations",
+    "# TYPE identity_registrations_total counter",
+    `identity_registrations_total ${registerCount}`,
+    "# HELP identity_violations_total Total violations recorded",
+    "# TYPE identity_violations_total counter",
+    `identity_violations_total ${violationCount}`,
+    "# HELP identity_http_requests_total Total HTTP requests",
+    "# TYPE identity_http_requests_total counter",
+    `identity_http_requests_total ${requestCount}`,
+    "# HELP identity_ledger_height Current ledger height",
+    "# TYPE identity_ledger_height gauge",
+    `identity_ledger_height ${ledger.length}`,
+    "# HELP identity_importers_total Total registered importers",
+    "# TYPE identity_importers_total gauge",
+    `identity_importers_total ${sampleImporters.length}`,
+    `# HELP identity_fabric_connected Whether Fabric SDK is connected`,
+    `# TYPE identity_fabric_connected gauge`,
+    `identity_fabric_connected ${fabricConnection && !fabricConnection.stub ? 1 : 0}`,
+    "",
+  ].join("\n"))
 })
 
 // ── Fabric network status (for dashboard) ──
@@ -83,6 +130,7 @@ app.get("/fabric/status", (req, res) => {
     fabric_version: "2.5.4",
     channel: "india-customs-main",
     chaincode: { name: "importer", version: "1.0", language: "Go" },
+    mode: fabricConnection && !fabricConnection.stub ? "live" : "simulated",
     organizations: [
       {
         name: "CustomsOrg",
@@ -124,6 +172,7 @@ app.get("/fabric/ledger", (req, res) => {
 // ── Query importer ──
 app.get("/importer/:gstin", async (req, res) => {
   try {
+    queryCount++
     const profile = await queryImporter(req.params.gstin)
     logTransaction("QueryImporter", { importer_id: req.params.gstin })
     res.json(profile)
@@ -152,6 +201,7 @@ app.get("/importers", async (req, res) => {
 // ── Register new importer ──
 app.post("/importer", async (req, res) => {
   try {
+    registerCount++
     const profile = await registerImporter(req.body)
     logTransaction("RegisterImporter", { importer_id: req.body.importer_id })
     res.status(201).json(profile)
@@ -163,6 +213,7 @@ app.post("/importer", async (req, res) => {
 // ── Add violation ──
 app.post("/importer/:gstin/violation", async (req, res) => {
   try {
+    violationCount++
     await addViolation(req.params.gstin, req.body)
     logTransaction("AddViolation", { importer_id: req.params.gstin, ...req.body })
     res.json({ status: "ok" })
@@ -174,5 +225,25 @@ app.post("/importer/:gstin/violation", async (req, res) => {
 // ── Start server ──
 app.listen(port, async () => {
   console.log(`🔗 Identity Service running on port ${port}`)
+  console.log(`📊 Prometheus metrics on http://localhost:${port}/metrics`)
+
+  // Try to connect to Fabric SDK
+  try {
+    fabricConnection = await connectFabricGateway()
+    fabricStatus = fabricConnection.stub ? "simulated" : "connected"
+    console.log(`🔗 Fabric mode: ${fabricStatus}`)
+  } catch (e) {
+    fabricStatus = "simulated"
+    fabricConnection = { stub: true }
+    console.log("🔗 Fabric unavailable, using in-memory ledger")
+  }
+
   await preloadImporters()
+})
+
+// ── Graceful shutdown ──
+process.on("SIGTERM", () => {
+  console.log("Shutting down identity-svc...")
+  if (fabricConnection) disconnectFabricGateway(fabricConnection)
+  process.exit(0)
 })
