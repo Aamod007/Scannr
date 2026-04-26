@@ -11,6 +11,15 @@ from app.model.inference import run_inference
 from app.preprocess.xray_pipeline import preprocess_xray
 from pydantic import BaseModel
 
+# Metrics — lightweight, zero-dependency Prometheus exporter
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
+try:
+    from metrics import get_metrics_route, setup_metrics as _setup_metrics
+    _HAS_METRICS = True
+except ImportError:
+    _HAS_METRICS = False
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -23,6 +32,10 @@ app = FastAPI(
 MODEL_PATH = os.getenv("MODEL_PATH", "runs/detect/scannr_vision_model/weights/best.pt")
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+if _HAS_METRICS:
+    app.router.routes.append(get_metrics_route())
+    _setup_metrics(app, service_name="vision-svc")
 
 
 class ScanPayload(BaseModel):

@@ -3,6 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const http = require('http');
 const fs = require('fs');
+const { WebSocketServer } = require('ws');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -423,6 +424,15 @@ app.post('/api/clearance/initiate', (req, res) => {
     created_at: new Date().toISOString(),
   };
   QUEUE.unshift(newContainer);
+
+  // Broadcast new container event to all WebSocket clients
+  const scored = scoreContainer(newContainer);
+  broadcastWS({
+    type: 'new_clearance',
+    container: { ...newContainer, ...scored },
+    timestamp: new Date().toISOString(),
+  });
+
   res.json({ clearance_id, container_id: newContainer.id, status: 'PROCESSING', estimated_completion_sec: 50 });
 });
 
@@ -513,13 +523,98 @@ app.get('/api/ml/status', (req, res) => {
   res.json(modelInfo);
 });
 
+// ── Prometheus-style metrics endpoint ──
+let requestCount = 0;
+let clearanceCount = 0;
+let wsConnectionCount = 0;
+
+app.use((req, res, next) => {
+  requestCount++;
+  next();
+});
+
+app.get('/metrics', (req, res) => {
+  const scored = QUEUE.map(c => ({ ...c, ...scoreContainer(c) }));
+  const greens = scored.filter(c => c.lane === 'GREEN').length;
+  const yellows = scored.filter(c => c.lane === 'YELLOW').length;
+  const reds = scored.filter(c => c.lane === 'RED').length;
+  res.set('Content-Type', 'text/plain');
+  res.send([
+    '# HELP scannr_http_requests_total Total HTTP requests',
+    '# TYPE scannr_http_requests_total counter',
+    `scannr_http_requests_total ${requestCount}`,
+    '# HELP scannr_clearances_total Total clearances initiated',
+    '# TYPE scannr_clearances_total counter',
+    `scannr_clearances_total ${clearanceCount}`,
+    '# HELP scannr_containers_queued Current containers in queue',
+    '# TYPE scannr_containers_queued gauge',
+    `scannr_containers_queued ${QUEUE.length}`,
+    '# HELP scannr_lane_distribution Containers by lane',
+    '# TYPE scannr_lane_distribution gauge',
+    `scannr_lane_distribution{lane="green"} ${greens}`,
+    `scannr_lane_distribution{lane="yellow"} ${yellows}`,
+    `scannr_lane_distribution{lane="red"} ${reds}`,
+    '# HELP scannr_ws_connections Active WebSocket connections',
+    '# TYPE scannr_ws_connections gauge',
+    `scannr_ws_connections ${wsConnectionCount}`,
+    '# HELP scannr_services_healthy Number of healthy microservices',
+    '# TYPE scannr_services_healthy gauge',
+    `scannr_services_healthy ${SERVICES.filter(s => s.status === 'healthy').length}`,
+    '',
+  ].join('\n'));
+});
+
 // Serve UI (catch-all — must be last)
 app.get('*', (req, res) => {
   res.sendFile(uiPath);
 });
 
-app.listen(PORT, () => {
+// ── WebSocket server for live stats push ──
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws/stats' });
+
+function broadcastWS(data) {
+  const payload = JSON.stringify(data);
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) client.send(payload);
+  });
+}
+
+// Push live dashboard stats to all clients every 5 seconds
+setInterval(() => {
+  if (wss.clients.size === 0) return;
+  const scored = QUEUE.map(c => ({ ...c, ...scoreContainer(c) }));
+  const reds = scored.filter(c => c.lane === 'RED').length;
+  const yellows = scored.filter(c => c.lane === 'YELLOW').length;
+  const greens = scored.filter(c => c.lane === 'GREEN').length;
+  const total = scored.length;
+  broadcastWS({
+    type: 'stats_update',
+    stats: {
+      throughput: DASHBOARD_STATS.throughput,
+      containers_today: total,
+      avg_clearance_time: DASHBOARD_STATS.avg_clearance_time,
+      ai_accuracy: ML_MODEL.current_accuracy,
+      active_alerts: reds,
+      green_lane_pct: total > 0 ? Math.round((greens / total) * 100) : 0,
+      red_lane_count: reds,
+      yellow_lane_count: yellows,
+      green_lane_count: greens,
+      system_health: { healthy: SERVICES.filter(s => s.status === 'healthy').length, total: SERVICES.length },
+    },
+    timestamp: new Date().toISOString(),
+  });
+}, 5000);
+
+wss.on('connection', (ws) => {
+  wsConnectionCount++;
+  ws.on('close', () => wsConnectionCount--);
+});
+
+server.listen(PORT, () => {
   console.log(`\n🚀 SCANNR Dashboard running on http://localhost:${PORT}`);
+  console.log(`🔌 WebSocket live stats on ws://localhost:${PORT}/ws/stats`);
+  console.log(`📊 Prometheus metrics on http://localhost:${PORT}/metrics`);
   console.log(`\n📡 API Endpoints:`);
   console.log(`  GET  /api/dashboard/stats    — live dashboard KPIs`);
   console.log(`  GET  /api/dashboard/activity — activity feed`);
@@ -535,5 +630,6 @@ app.listen(PORT, () => {
   console.log(`  GET  /api/services           — microservices health`);
   console.log(`  GET  /api/tariffs            — tariff sync status`);
   console.log(`  GET  /api/ml/status          — ML model info`);
+  console.log(`  GET  /metrics                — Prometheus metrics`);
   console.log(`  GET  /health                 — service health\n`);
 });
