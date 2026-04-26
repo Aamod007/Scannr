@@ -96,6 +96,13 @@ kubeconfig
 *.engine
 models/
 checkpoints/
+labels.cache
+
+# YOLO training runs
+runs/
+
+# User uploads
+uploads/
 
 # Data files
 data/

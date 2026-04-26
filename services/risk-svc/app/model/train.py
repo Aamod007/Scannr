@@ -77,66 +77,76 @@ CARGO_CATEGORY_MAP = {
 }
 
 
-def _generate_synthetic_dataset(n_samples: int = 5000, seed: int = 42) -> pd.DataFrame:
-    """Generate realistic synthetic training data from clearance rules."""
-    rng = np.random.RandomState(seed)
+def _load_training_data(data_path: str = None) -> pd.DataFrame:
+    """Load real training data from open-source datasets.
 
-    data = {
-        "blockchain_trust_score": rng.uniform(0, 100, n_samples),
-        "years_active": rng.randint(0, 30, n_samples),
-        "violation_count": rng.poisson(1.5, n_samples),
-        "aeo_tier": rng.choice([0, 1, 2, 3], n_samples, p=[0.3, 0.3, 0.25, 0.15]),
-        "recent_clean_inspections": rng.randint(0, 50, n_samples),
-        "vision_anomaly_flag": rng.choice([0, 1], n_samples, p=[0.85, 0.15]),
-        "vision_confidence": rng.uniform(0, 1, n_samples),
-        "vision_detection_count": rng.poisson(0.3, n_samples),
-        "vision_class_encoded": rng.choice(
-            [0, 1, 2, 3, 4], n_samples, p=[0.80, 0.05, 0.05, 0.05, 0.05]
-        ),
-        "cargo_hs_risk_weight": rng.uniform(0.5, 3.0, n_samples),
-        "cargo_declared_value_log": rng.uniform(10, 20, n_samples),
-        "cargo_weight": rng.uniform(100, 50000, n_samples),
-        "cargo_volume": rng.uniform(1, 100, n_samples),
-        "cargo_category_encoded": rng.randint(0, 8, n_samples),
-        "cargo_value_weight_ratio": rng.uniform(0.01, 500, n_samples),
-        "route_origin_risk_index": rng.uniform(0, 10, n_samples),
-        "route_transshipment_count": rng.poisson(0.8, n_samples),
-        "route_carrier_risk": rng.uniform(0, 5, n_samples),
-        "route_port_risk": rng.uniform(0, 5, n_samples),
-        "intel_ofac_match": rng.choice([0, 1], n_samples, p=[0.98, 0.02]),
-        "intel_un_conflict_flag": rng.choice([0, 1], n_samples, p=[0.95, 0.05]),
-        "intel_interpol_alert": rng.choice([0, 1], n_samples, p=[0.99, 0.01]),
-        "intel_seasonal_index": rng.uniform(0.5, 8.0, n_samples),
-        "intel_composite_score": rng.uniform(0, 50, n_samples),
-        "trust_vision_interaction": rng.uniform(0, 100, n_samples),
-    }
+    Searches for CSV files in data/risk/ directory. Requires real data
+    downloaded via: python scripts/data/download_datasets.py
 
-    df = pd.DataFrame(data)
+    Args:
+        data_path: Optional explicit path to a CSV file with training data.
 
-    # Derive interaction feature
-    df["trust_vision_interaction"] = (
-        (100 - df["blockchain_trust_score"]) * df["vision_confidence"]
+    Returns:
+        DataFrame with feature columns and 'label' column (0=GREEN, 1=YELLOW, 2=RED).
+
+    Raises:
+        FileNotFoundError: If no training data is available.
+    """
+    search_paths = [
+        data_path,
+        os.path.join(os.getenv("DATA_DIR", "data"), "risk", "customs_risk_training.csv"),
+        os.path.join("data", "risk", "customs_risk_training.csv"),
+    ]
+
+    for path in search_paths:
+        if path and os.path.exists(path):
+            logger.info(f"Loading training data from {path}")
+            df = pd.read_csv(path)
+
+            # Encode categorical columns if present
+            if "vision_class" in df.columns:
+                df["vision_class_encoded"] = df["vision_class"].map(VISION_CLASS_MAP).fillna(0).astype(int)
+            if "cargo_category" in df.columns:
+                df["cargo_category_encoded"] = df["cargo_category"].map(CARGO_CATEGORY_MAP).fillna(0).astype(int)
+
+            # Derive computed features if missing
+            if "cargo_declared_value_log" not in df.columns and "cargo_declared_value" in df.columns:
+                import math
+                df["cargo_declared_value_log"] = df["cargo_declared_value"].clip(lower=1).apply(math.log)
+            if "cargo_value_weight_ratio" not in df.columns:
+                df["cargo_value_weight_ratio"] = df.get("cargo_declared_value", 1) / df.get("cargo_weight", 1).clip(lower=1)
+            if "intel_composite_score" not in df.columns:
+                df["intel_composite_score"] = (
+                    df.get("intel_ofac_match", 0) * 50
+                    + df.get("intel_un_conflict_flag", 0) * 30
+                    + df.get("intel_interpol_alert", 0) * 20
+                    + df.get("intel_seasonal_index", 1.0)
+                )
+            if "trust_vision_interaction" not in df.columns:
+                df["trust_vision_interaction"] = (
+                    (100 - df.get("blockchain_trust_score", 50)) * df.get("vision_confidence", 0)
+                )
+
+            # Map label column
+            if "lane_code" in df.columns and "label" not in df.columns:
+                df["label"] = df["lane_code"]
+            elif "lane" in df.columns and "label" not in df.columns:
+                lane_map = {"GREEN": 0, "YELLOW": 1, "RED": 2}
+                df["label"] = df["lane"].map(lane_map).fillna(1).astype(int)
+
+            # Ensure all feature columns exist with defaults
+            for col in FEATURE_COLUMNS:
+                if col not in df.columns:
+                    df[col] = 0.0
+
+            logger.info(f"Loaded {len(df)} training samples from {path}")
+            return df
+
+    raise FileNotFoundError(
+        "No training data found. Download real datasets first:\n"
+        "  python scripts/data/download_datasets.py\n"
+        "Expected CSV at: data/risk/customs_risk_training.csv"
     )
-
-    # Generate labels (risk lane) using weighted rule-based logic
-    risk = (
-        (100 - df["blockchain_trust_score"]) * 0.40
-        + df["vision_anomaly_flag"] * 60 * 0.30
-        + df["vision_confidence"] * 40 * 0.30
-        + df["cargo_hs_risk_weight"] * 15 * 0.15
-        + df["route_origin_risk_index"] * 5 * 0.10
-        + df["intel_ofac_match"] * 50 * 0.05
-        + df["intel_un_conflict_flag"] * 30 * 0.05
-    )
-
-    # Map to lane: GREEN=0 (0-20), YELLOW=1 (21-60), RED=2 (61-100)
-    df["label"] = pd.cut(
-        risk,
-        bins=[-np.inf, 20, 60, np.inf],
-        labels=[0, 1, 2],
-    ).astype(int)
-
-    return df
 
 
 def train_model(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -150,10 +160,9 @@ def train_model(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     config = config or {}
 
-    logger.info("Generating synthetic training dataset...")
-    df = _generate_synthetic_dataset(
-        n_samples=config.get("n_samples", 5000),
-        seed=config.get("seed", 42),
+    logger.info("Loading training data from open-source datasets...")
+    df = _load_training_data(
+        data_path=config.get("data_path", None),
     )
 
     X = df[FEATURE_COLUMNS]

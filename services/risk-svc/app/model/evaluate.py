@@ -14,8 +14,8 @@ MODEL_DIR = os.getenv("MODEL_DIR", "data/models")
 def evaluate_model(n_test: int = 1000) -> Dict[str, Any]:
     """Evaluate the current risk model and return metrics.
 
-    Generates a synthetic test set (same distribution as training)
-    and computes precision, recall, F1, AUC-ROC, and FNR.
+    Loads the same training data as train.py, holds out 20% as a test set
+    (using the same random seed), and computes precision, recall, F1, AUC-ROC, and FNR.
 
     Returns:
         Dictionary of evaluation metrics.
@@ -48,12 +48,15 @@ def evaluate_model(n_test: int = 1000) -> Dict[str, Any]:
         model = xgb.XGBClassifier()
         model.load_model(model_path)
 
-        # Generate test data (with a different seed to avoid overlap)
-        from app.model.train import _generate_synthetic_dataset, FEATURE_COLUMNS
+        # Load real test data
+        from app.model.train import _load_training_data, FEATURE_COLUMNS
+        from sklearn.model_selection import train_test_split
 
-        df = _generate_synthetic_dataset(n_samples=n_test, seed=999)
-        X_test = df[FEATURE_COLUMNS]
-        y_test = df["label"]
+        df = _load_training_data()
+        # Use last 20% as test set (same split as training)
+        _, df_test = train_test_split(df, test_size=0.2, stratify=df["label"], random_state=42)
+        X_test = df_test[FEATURE_COLUMNS]
+        y_test = df_test["label"]
 
         y_pred = model.predict(X_test)
         y_prob = model.predict_proba(X_test)
