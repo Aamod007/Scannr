@@ -1,4 +1,4 @@
-import './App.css';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 function Sidebar() {
@@ -25,7 +25,7 @@ function Sidebar() {
       </nav>
       <div className="p-4 mt-auto">
         <div className="glass-card p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-brand-accent flex items-center justify-center text-white font-bold">DC</div>
+          <div className="w-10 h-10 rounded-full bg-brand-accent flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)]">DC</div>
           <div>
             <div className="text-xs font-bold text-white">David Chen</div>
             <div className="text-[10px] text-gray-500">Global Admin</div>
@@ -37,6 +37,42 @@ function Sidebar() {
 }
 
 function LiveDashboard() {
+  const [stats, setStats] = useState({ cleared: 0, pending: 0, holds: 0 });
+  const [wsStatus, setWsStatus] = useState('CONNECTING');
+  const [backendHealth, setBackendHealth] = useState('UNKNOWN');
+
+  useEffect(() => {
+    // Check backend health
+    fetch('/health')
+      .then(res => res.json())
+      .then(data => setBackendHealth(data.status))
+      .catch(() => setBackendHealth('ERROR'));
+
+    // Connect WebSocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // If running via Vite dev server, route to 8000, otherwise relative
+    const wsUrl = import.meta.env.DEV ? 'ws://localhost:8000/ws/stats' : `${protocol}//${window.location.host}/ws/stats`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => setWsStatus('CONNECTED');
+    ws.onclose = () => setWsStatus('DISCONNECTED');
+    ws.onerror = () => setWsStatus('ERROR');
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'stats_update') {
+          setStats(data.payload);
+        } else if (data.type === 'new_clearance') {
+          // Highlight flash effect could be added here
+        }
+      } catch (err) {
+        console.error('Failed to parse WS message', err);
+      }
+    };
+
+    return () => ws.close();
+  }, []);
+
   return (
     <main className="page-view flex-1 overflow-y-auto p-8 relative">
       <div className="glass-card rounded-2xl px-5 py-3 mb-6 flex items-center justify-between">
@@ -49,11 +85,38 @@ function LiveDashboard() {
         </div>
       </header>
       <div className="grid grid-cols-12 gap-6">
-        <section className="col-span-8 glass-card rounded-3xl p-6 min-h-[500px] flex items-center justify-center border border-dashed border-white/20">
-          <div className="text-center">
-            <span className="material-symbols-outlined text-4xl text-brand-accent mb-2">dashboard_customize</span>
-            <h2 className="text-xl font-bold text-white">Dashboard Layout</h2>
-            <p className="text-sm text-gray-500 mt-2">React Port Phase 4 Initialization Complete.</p>
+        <section className="col-span-8 glass-card rounded-3xl p-6 min-h-[500px] flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Live Operations MVP</h2>
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                <span className={`w-2 h-2 rounded-full ${wsStatus === 'CONNECTED' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                {wsStatus === 'CONNECTED' ? 'Real-time Stats Active' : 'Real-time Stats Disconnected'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-6 flex-1">
+            <div className="bg-brand-dark/50 border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+              <div className="absolute top-0 w-full h-1 bg-green-500/50"></div>
+              <span className="material-symbols-outlined text-green-400 text-3xl mb-3 opacity-50 group-hover:opacity-100 transition-opacity">check_circle</span>
+              <div className="text-5xl font-mono font-bold text-white">{stats.cleared}</div>
+              <div className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-2">Cleared</div>
+            </div>
+            
+            <div className="bg-brand-dark/50 border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+              <div className="absolute top-0 w-full h-1 bg-brand-amber/50"></div>
+              <span className="material-symbols-outlined text-brand-amber text-3xl mb-3 opacity-50 group-hover:opacity-100 transition-opacity">pending_actions</span>
+              <div className="text-5xl font-mono font-bold text-white">{stats.pending}</div>
+              <div className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-2">Pending</div>
+            </div>
+
+            <div className="bg-brand-dark/50 border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+              <div className="absolute top-0 w-full h-1 bg-brand-red/50"></div>
+              <span className="material-symbols-outlined text-brand-red text-3xl mb-3 opacity-50 group-hover:opacity-100 transition-opacity">warning</span>
+              <div className="text-5xl font-mono font-bold text-white">{stats.holds}</div>
+              <div className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-2">Holds</div>
+            </div>
           </div>
         </section>
         <aside className="col-span-4 space-y-6">
@@ -65,8 +128,16 @@ function LiveDashboard() {
                 <span className="text-xs font-bold text-brand-neon">React + Vite</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">WebSocket connection</span>
-                <span className="text-xs font-bold text-green-400">PENDING</span>
+                <span className="text-xs font-medium">Gateway API Health</span>
+                <span className={`text-xs font-bold ${backendHealth === 'ok' ? 'text-green-400' : 'text-red-400'}`}>
+                  {backendHealth === 'ok' ? 'ACTIVE' : backendHealth}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">WebSocket Status</span>
+                <span className={`text-xs font-bold ${wsStatus === 'CONNECTED' ? 'text-green-400' : 'text-red-400'}`}>
+                  {wsStatus}
+                </span>
               </div>
             </div>
           </article>
