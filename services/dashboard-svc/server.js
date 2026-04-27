@@ -18,7 +18,6 @@ const uiPath = path.resolve(__dirname, 'dist', 'index.html');
 const VISION_URL = process.env.VISION_SVC_URL || 'http://localhost:8001';
 const RISK_URL = process.env.RISK_SVC_URL || 'http://localhost:8002';
 const IDENTITY_URL = process.env.IDENTITY_SVC_URL || 'http://localhost:8005';
-const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:8000';
 
 app.use(cors());
 app.use(express.json());
@@ -74,28 +73,79 @@ async function proxyOrFallback(url, fallback, options = {}) {
 }
 
 // ==========================================================================
-// SIMULATED DATA — mirrors PRD schemas & all microservices
+// SIMULATED DATA - mirrors PRD schemas and microservices
 // ==========================================================================
 
 // Container queue (clearance_decisions table)
-const QUEUE = [];
+const minutesAgo = (minutes) => new Date(Date.now() - minutes * 60_000).toISOString();
+
+const QUEUE = [
+  {
+    id: 'TCMU-7481-3', type: 'Standard 20ft', origin: 'Singapore', flag: 'SG', origin_country: 'SG',
+    status: 'Auto-cleared', operator: 'AI', cargo_category: 'electronics',
+    cargo_weight: 8400, cargo_volume: 28, cargo_declared_value: 3200000, hs_code: '8471.30',
+    blockchain_trust_score: 95, vision_anomaly_flag: false, vision_confidence: 0.05, vision_class: 'none',
+    route_transshipment_count: 0, importer_gstin: '29AALCT1234H1Z9', consignee: 'Bharat Machines Corp.',
+    created_at: minutesAgo(9),
+  },
+  {
+    id: 'MSCU-1194-8', type: 'Reefer 40ft', origin: 'Rotterdam', flag: 'NL', origin_country: 'NL',
+    status: 'Manual Review', operator: 'OFF-MUM-0015', cargo_category: 'perishables',
+    cargo_weight: 12600, cargo_volume: 45, cargo_declared_value: 1800000, hs_code: '0202.30',
+    blockchain_trust_score: 75, vision_anomaly_flag: false, vision_confidence: 0.21, vision_class: 'density_variance',
+    route_transshipment_count: 1, importer_gstin: '33AADCS0472B1Z2', consignee: 'SG Fresh Foods India',
+    created_at: minutesAgo(22),
+  },
+  {
+    id: 'CMAU-6620-2', type: 'Standard 40ft', origin: 'Shenzhen', flag: 'CN', origin_country: 'CN',
+    status: 'Hold', operator: 'OFF-MUM-0042', cargo_category: 'batteries',
+    cargo_weight: 15100, cargo_volume: 51, cargo_declared_value: 8800000, hs_code: '8507.60',
+    blockchain_trust_score: 18, vision_anomaly_flag: true, vision_confidence: 0.83, vision_class: 'concealed_density',
+    route_transshipment_count: 2, importer_gstin: '24AABCE5678F1Z1', consignee: 'MetalWorks Gujarat Pvt. Ltd.',
+    created_at: minutesAgo(38),
+  },
+  {
+    id: 'HLCU-3308-6', type: 'Open Top 20ft', origin: 'Dubai', flag: 'AE', origin_country: 'AE',
+    status: 'Manual Review', operator: 'OFF-MUM-0031', cargo_category: 'machinery',
+    cargo_weight: 17600, cargo_volume: 32, cargo_declared_value: 6100000, hs_code: '8429.52',
+    blockchain_trust_score: 48, vision_anomaly_flag: false, vision_confidence: 0.48, vision_class: 'oversize_pattern',
+    route_transshipment_count: 1, importer_gstin: '07AABCR1234E1Z3', consignee: 'EuroChem India Ltd.',
+    created_at: minutesAgo(55),
+  },
+  {
+    id: 'OOLU-9082-1', type: 'Standard 20ft', origin: 'Busan', flag: 'KR', origin_country: 'KR',
+    status: 'Auto-cleared', operator: 'AI', cargo_category: 'consumer goods',
+    cargo_weight: 9200, cargo_volume: 30, cargo_declared_value: 2200000, hs_code: '8517.12',
+    blockchain_trust_score: 88, vision_anomaly_flag: false, vision_confidence: 0.08, vision_class: 'none',
+    route_transshipment_count: 0, importer_gstin: '27AABCU9603R1ZN', consignee: 'TechCorp India Pvt. Ltd.',
+    created_at: minutesAgo(74),
+  },
+  {
+    id: 'TGHU-2044-5', type: 'Tank 20ft', origin: 'Lagos', flag: 'NG', origin_country: 'NG',
+    status: 'Hold', operator: 'OFF-MUM-0028', cargo_category: 'chemicals',
+    cargo_weight: 19000, cargo_volume: 26, cargo_declared_value: 12500000, hs_code: '2933.99',
+    blockchain_trust_score: 30, vision_anomaly_flag: true, vision_confidence: 0.72, vision_class: 'unusual_shape',
+    route_transshipment_count: 2, importer_gstin: '36AABCG9012K1Z5', consignee: 'Indo-Pak Textiles',
+    created_at: minutesAgo(96),
+  },
+];
 
 // Operators (officers)
 const OPERATORS = [
-  { id: 'OFF-MUM-0042', name: 'David Chen', initials: 'DC', role: 'Global Admin', status: 'on_shift', assigned: 6, accuracy: 98.4, shift: '06:00 – 14:00', color: 'blue' },
-  { id: 'OFF-MUM-0015', name: 'Jessica Santos', initials: 'JS', role: 'Sr. Inspector', status: 'on_shift', assigned: 4, accuracy: 96.1, shift: '06:00 – 14:00', color: 'pink' },
-  { id: 'OFF-MUM-0031', name: 'James Donovan', initials: 'JD', role: 'Inspector', status: 'on_shift', assigned: 3, accuracy: 94.7, shift: '06:00 – 14:00', color: 'gray' },
-  { id: 'OFF-MUM-0028', name: 'Maria Kovacs', initials: 'MK', role: 'Inspector', status: 'on_shift', assigned: 5, accuracy: 97.2, shift: '06:00 – 14:00', color: 'purple' },
-  { id: 'OFF-MUM-0053', name: 'Priya Mehta', initials: 'PM', role: 'Sr. Inspector', status: 'on_shift', assigned: 4, accuracy: 95.8, shift: '06:00 – 14:00', color: 'teal' },
-  { id: 'OFF-MUM-0067', name: 'Arjun Lahiri', initials: 'AL', role: 'Sr. Inspector', status: 'off_duty', assigned: 0, accuracy: 95.8, shift: '14:00 – 22:00', color: 'teal' },
-  { id: 'OFF-MUM-0072', name: 'Rachel Wang', initials: 'RW', role: 'Inspector', status: 'off_duty', assigned: 0, accuracy: 93.1, shift: '14:00 – 22:00', color: 'orange' },
-  { id: 'OFF-MUM-0044', name: 'Rajan Kumar', initials: 'RK', role: 'Inspector', status: 'off_duty', assigned: 0, accuracy: 91.5, shift: '22:00 – 06:00', color: 'red' },
+  { id: 'OFF-MUM-0042', name: 'David Chen', initials: 'DC', role: 'Global Admin', status: 'on_shift', assigned: 6, accuracy: 98.4, shift: '06:00 - 14:00', color: 'blue' },
+  { id: 'OFF-MUM-0015', name: 'Jessica Santos', initials: 'JS', role: 'Sr. Inspector', status: 'on_shift', assigned: 4, accuracy: 96.1, shift: '06:00 - 14:00', color: 'pink' },
+  { id: 'OFF-MUM-0031', name: 'James Donovan', initials: 'JD', role: 'Inspector', status: 'on_shift', assigned: 3, accuracy: 94.7, shift: '06:00 - 14:00', color: 'gray' },
+  { id: 'OFF-MUM-0028', name: 'Maria Kovacs', initials: 'MK', role: 'Inspector', status: 'on_shift', assigned: 5, accuracy: 97.2, shift: '06:00 - 14:00', color: 'purple' },
+  { id: 'OFF-MUM-0053', name: 'Priya Mehta', initials: 'PM', role: 'Sr. Inspector', status: 'on_shift', assigned: 4, accuracy: 95.8, shift: '06:00 - 14:00', color: 'teal' },
+  { id: 'OFF-MUM-0067', name: 'Arjun Lahiri', initials: 'AL', role: 'Sr. Inspector', status: 'off_duty', assigned: 0, accuracy: 95.8, shift: '14:00 - 22:00', color: 'teal' },
+  { id: 'OFF-MUM-0072', name: 'Rachel Wang', initials: 'RW', role: 'Inspector', status: 'off_duty', assigned: 0, accuracy: 93.1, shift: '14:00 - 22:00', color: 'orange' },
+  { id: 'OFF-MUM-0044', name: 'Rajan Kumar', initials: 'RK', role: 'Inspector', status: 'off_duty', assigned: 0, accuracy: 91.5, shift: '22:00 - 06:00', color: 'red' },
 ];
 
 // Override log (officer_overrides table)
 const OVERRIDES = [];
 
-// Importer profiles (blockchain — identity-svc)
+// Importer profiles (blockchain identity-svc)
 const IMPORTERS = {
   '27AABCU9603R1ZN': { name: 'TechCorp India Pvt. Ltd.', gstin: '27AABCU9603R1ZN', trust_score: 88, registered_since: '2019-01-14', years_active: 7, aeo_tier: 'Tier 1 Certified', total_inspections: 47, violations: 0, sanctions_match: false, block_hash: '0x3f9a2c...e221', block_number: 184729 },
   '33AADCS0472B1Z2': { name: 'SG Fresh Foods India', gstin: '33AADCS0472B1Z2', trust_score: 75, registered_since: '2021-03-22', years_active: 5, aeo_tier: 'Tier 2', total_inspections: 23, violations: 1, sanctions_match: false, block_hash: '0x7c12ab...f893', block_number: 184614 },
@@ -105,18 +155,18 @@ const IMPORTERS = {
   '36AABCG9012K1Z5': { name: 'Indo-Pak Textiles', gstin: '36AABCG9012K1Z5', trust_score: 30, registered_since: '2022-08-15', years_active: 4, aeo_tier: 'None', total_inspections: 18, violations: 5, sanctions_match: false, block_hash: '0x2d11fa...b339', block_number: 184455 },
 };
 
-// Microservices health (mirrors 7 microservices from PRD §3.2)
+// Microservices health
 const SERVICES = [
   { name: 'vision-svc', description: 'YOLOv8 inference + Grad-CAM', status: 'healthy', latency: '4.2s', uptime: 99.97, port: 8001 },
   { name: 'identity-svc', description: 'Hyperledger Fabric gateway', status: 'healthy', latency: '8.1s', uptime: 100, port: 8002 },
   { name: 'risk-svc', description: 'XGBoost risk scoring', status: 'healthy', latency: '1.8s', uptime: 99.94, port: 8003 },
-  { name: 'tariff-sync-svc', description: 'CBIC tariff API sync', status: 'healthy', latency: '—', uptime: 99.99, port: 8004 },
-  { name: 'ml-monitor-svc', description: 'Drift detection + A/B test', status: 'healthy', latency: '—', uptime: 99.91, port: 8005 },
+  { name: 'tariff-sync-svc', description: 'CBIC tariff API sync', status: 'healthy', latency: 'n/a', uptime: 99.99, port: 8004 },
+  { name: 'ml-monitor-svc', description: 'Drift detection + A/B test', status: 'healthy', latency: 'n/a', uptime: 99.91, port: 8005 },
   { name: 'api-gateway', description: 'Kong + FastAPI routing', status: 'healthy', latency: '12ms', uptime: 100, port: 8006 },
-  { name: 'dashboard-svc', description: 'UI + API gateway', status: 'healthy', latency: '—', uptime: 100, port: 8000 },
+  { name: 'dashboard-svc', description: 'UI + API gateway', status: 'healthy', latency: 'n/a', uptime: 100, port: 8000 },
 ];
 
-// Tariff data (tariff_risk_weights table — per PRD §5.3.4)
+// Tariff data (tariff_risk_weights table)
 const TARIFFS = {
   last_sync: '2026-02-20T06:12:00Z',
   next_sync: '2026-02-20T12:12:00Z',
@@ -154,26 +204,31 @@ const SETTINGS = {
 
 // Analytics data (aggregated from clearance_decisions)
 const ANALYTICS = {
-  total_scans: 0,
+  total_scans: 1284,
   lane_distribution: { green: 0, yellow: 0, red: 0 },
   weekly_volumes: [
-    { day: 'Mon', count: 0 }, { day: 'Tue', count: 0 },
-    { day: 'Wed', count: 0 }, { day: 'Thu', count: 0 },
-    { day: 'Fri', count: 0 }, { day: 'Sat', count: 0 },
-    { day: 'Sun', count: 0 },
+    { day: 'Mon', count: 172 }, { day: 'Tue', count: 196 },
+    { day: 'Wed', count: 184 }, { day: 'Thu', count: 211 },
+    { day: 'Fri', count: 229 }, { day: 'Sat', count: 156 },
+    { day: 'Sun', count: 136 },
   ],
-  risk_by_origin: [],
-  ai_accuracy_trend: [],
-  clearance_volume_trend: [],
+  risk_by_origin: [
+    { code: 'CN', name: 'China', risk: 85 },
+    { code: 'RU', name: 'Russia', risk: 78 },
+    { code: 'NG', name: 'Nigeria', risk: 65 },
+    { code: 'MM', name: 'Myanmar', risk: 62 },
+  ],
+  ai_accuracy_trend: [91.2, 91.8, 92.4, 92.9, 93.1, 93.0, 93.1],
+  clearance_volume_trend: [172, 196, 184, 211, 229, 156, 136],
 };
 
 // Dashboard live stats
 const DASHBOARD_STATS = {
-  throughput: 0,
-  containers_today: 0,
-  avg_clearance_time: '0s',
-  ai_accuracy: 0,
-  active_alerts: 0,
+  throughput: 42,
+  containers_today: QUEUE.length,
+  avg_clearance_time: '11m 40s',
+  ai_accuracy: ML_MODEL.current_accuracy,
+  active_alerts: 2,
   green_lane_pct: 0,
   red_lane_count: 0,
   yellow_lane_count: 0,
@@ -182,7 +237,13 @@ const DASHBOARD_STATS = {
 };
 
 // Activity feed (live events)
-const ACTIVITY_FEED = [];
+const ACTIVITY_FEED = [
+  { id: 'evt-001', type: 'clearance', message: 'TCMU-7481-3 auto-cleared through green lane', severity: 'success', timestamp: minutesAgo(9) },
+  { id: 'evt-002', type: 'hold', message: 'CMAU-6620-2 moved to red lane for density anomaly', severity: 'danger', timestamp: minutesAgo(38) },
+  { id: 'evt-003', type: 'review', message: 'MSCU-1194-8 assigned to manual review', severity: 'warning', timestamp: minutesAgo(22) },
+  { id: 'evt-004', type: 'model', message: 'Risk model v2.3 serving with 93.1% accuracy', severity: 'info', timestamp: minutesAgo(80) },
+  { id: 'evt-005', type: 'health', message: 'All seven dashboard-monitored services reporting healthy', severity: 'success', timestamp: minutesAgo(120) },
+];
 
 // Origin risk lookup (mirrors risk-svc/app/features/origin_risk.py)
 const ORIGIN_RISK = {
@@ -192,7 +253,7 @@ const ORIGIN_RISK = {
 };
 
 // ==========================================================================
-// Risk scoring — mirrors risk-svc/app/model/predict.py (fallback mode)
+// Risk scoring - mirrors risk-svc/app/model/predict.py (fallback mode)
 // ==========================================================================
 function scoreContainer(payload) {
   const trustWeight = 0.40;
@@ -413,14 +474,14 @@ app.post('/api/sanctions/check', (req, res) => {
   });
 });
 
-// --- Initiate Clearance (POST /clearance/initiate per PRD §7) ---
+// --- Initiate Clearance ---
 app.post('/api/clearance/initiate', (req, res) => {
-  const { container_id, importer_gstin, manifest_url, xray_scan_id, declared_value_inr, hs_code } = req.body;
+  const { container_id, importer_gstin, declared_value_inr, hs_code } = req.body;
   const clearance_id = 'CLR-' + Date.now().toString(36).toUpperCase();
   // Add to queue
   const newContainer = {
     id: container_id || 'NEW-' + Date.now().toString(36).toUpperCase(),
-    type: 'Standard 20ft', origin: 'Unknown', flag: '🏳️', origin_country: 'IN',
+    type: 'Standard 20ft', origin: 'Unknown', flag: 'IN', origin_country: 'IN',
     status: 'Live Scan', operator: 'AI',
     cargo_category: 'mixed', cargo_weight: 10000, cargo_volume: 30,
     cargo_declared_value: declared_value_inr || 100000,
@@ -433,8 +494,18 @@ app.post('/api/clearance/initiate', (req, res) => {
   };
   QUEUE.unshift(newContainer);
 
-  // Broadcast new container event to all WebSocket clients
   const scored = scoreContainer(newContainer);
+  clearanceCount++;
+  ACTIVITY_FEED.unshift({
+    id: `evt-${Date.now()}`,
+    type: 'clearance',
+    message: `${newContainer.id} entered ${scored.lane.toLowerCase()} lane`,
+    severity: scored.lane === 'RED' ? 'danger' : scored.lane === 'YELLOW' ? 'warning' : 'success',
+    timestamp: new Date().toISOString(),
+  });
+  ACTIVITY_FEED.splice(12);
+
+  // Broadcast new container event to all WebSocket clients.
   broadcastWS({
     type: 'new_clearance',
     container: { ...newContainer, ...scored },
@@ -460,7 +531,7 @@ app.get('/api/analytics', (req, res) => {
       yellow: total > 0 ? +(yellows / total).toFixed(2) : 0,
       red: total > 0 ? +(reds / total).toFixed(2) : 0,
     },
-    total_scans: ANALYTICS.total_scans,
+    total_scans: ANALYTICS.total_scans + total,
   });
 });
 
@@ -488,7 +559,7 @@ app.get('/api/services', async (req, res) => {
         await fetchService(`${url}/health`, { timeout: 2000 });
         return { ...svc, status: 'healthy', latency: `${Date.now() - start}ms` };
       } catch {
-        return { ...svc, status: 'unreachable', latency: '—' };
+        return { ...svc, status: 'unreachable', latency: 'n/a' };
       }
     }
     return svc;
@@ -572,7 +643,7 @@ app.get('/metrics', (req, res) => {
   ].join('\n'));
 });
 
-// Serve UI (catch-all — must be last)
+// Serve UI (catch-all, must be last)
 app.get('*', (req, res) => {
   res.sendFile(uiPath);
 });
@@ -620,24 +691,24 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\n🚀 SCANNR Dashboard running on http://localhost:${PORT}`);
-  console.log(`🔌 WebSocket live stats on ws://localhost:${PORT}/ws/stats`);
-  console.log(`📊 Prometheus metrics on http://localhost:${PORT}/metrics`);
-  console.log(`\n📡 API Endpoints:`);
-  console.log(`  GET  /api/dashboard/stats    — live dashboard KPIs`);
-  console.log(`  GET  /api/dashboard/activity — activity feed`);
-  console.log(`  GET  /api/queue              — container queue`);
-  console.log(`  GET  /api/containers/:id     — container detail`);
-  console.log(`  GET  /api/operators          — operator roster`);
-  console.log(`  GET  /api/overrides          — override log`);
-  console.log(`  GET  /api/analytics          — analytics data`);
-  console.log(`  GET  /api/importer/:gstin    — blockchain lookup`);
-  console.log(`  POST /api/sanctions/check    — sanctions check`);
-  console.log(`  POST /api/clearance/initiate — new clearance`);
-  console.log(`  GET  /api/settings           — system settings`);
-  console.log(`  GET  /api/services           — microservices health`);
-  console.log(`  GET  /api/tariffs            — tariff sync status`);
-  console.log(`  GET  /api/ml/status          — ML model info`);
-  console.log(`  GET  /metrics                — Prometheus metrics`);
-  console.log(`  GET  /health                 — service health\n`);
+  console.log(`\nSCANNR Dashboard running on http://localhost:${PORT}`);
+  console.log(`WebSocket live stats on ws://localhost:${PORT}/ws/stats`);
+  console.log(`Prometheus metrics on http://localhost:${PORT}/metrics`);
+  console.log(`\nAPI Endpoints:`);
+  console.log(`  GET  /api/dashboard/stats    - live dashboard KPIs`);
+  console.log(`  GET  /api/dashboard/activity - activity feed`);
+  console.log(`  GET  /api/queue              - container queue`);
+  console.log(`  GET  /api/containers/:id     - container detail`);
+  console.log(`  GET  /api/operators          - operator roster`);
+  console.log(`  GET  /api/overrides          - override log`);
+  console.log(`  GET  /api/analytics          - analytics data`);
+  console.log(`  GET  /api/importer/:gstin    - blockchain lookup`);
+  console.log(`  POST /api/sanctions/check    - sanctions check`);
+  console.log(`  POST /api/clearance/initiate - new clearance`);
+  console.log(`  GET  /api/settings           - system settings`);
+  console.log(`  GET  /api/services           - microservices health`);
+  console.log(`  GET  /api/tariffs            - tariff sync status`);
+  console.log(`  GET  /api/ml/status          - ML model info`);
+  console.log(`  GET  /metrics                - Prometheus metrics`);
+  console.log(`  GET  /health                 - service health\n`);
 });
