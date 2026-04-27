@@ -1,0 +1,77 @@
+{
+  "name": "scannr-network",
+  "version": "1.0.0",
+  "client": {
+    "organization": "CustomsOrg",
+    "connection": {
+      "timeout": {
+        "peer": { "endorser": "300" },
+        "orderer": "300"
+      }
+    }
+  },
+  "organizations": {
+    "CustomsOrg": {
+      "mspid": "CustomsMSP",
+      "peers": [
+        "peer0.customs.scannr.in",
+        "peer1.customs.scannr.in"
+      ],
+      "certificateAuthorities": ["ca-customs"]
+    },
+    "PortAuthorityOrg": {
+      "mspid": "PortAuthorityMSP",
+      "peers": [
+        "peer0.port.scannr.in",
+        "peer1.port.scannr.in"
+      ],
+      "certificateAuthorities": ["ca-port"]
+    }
+  },
+  "orderers": {
+    "orderer.scannr.in": {
+      "url": "grpcs://localhost:7050",
+      "grpcOptions": {
+        "ssl-target-name-override": "orderer.scannr.in"
+      }
+    }
+  },
+  "peers": {
+    "peer0.customs.scannr.in": {
+      "url": "grpcs://localhost:7051",
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.customs.scannr.in"
+      }
+    },
+    "peer1.customs.scannr.in": {
+      "url": "grpcs://localhost:8051",
+      "grpcOptions": {
+        "ssl-target-name-override": "peer1.customs.scannr.in"
+      }
+    },
+    "peer0.port.scannr.in": {
+      "url": "grpcs://localhost:9051",
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.port.scannr.in"
+      }
+    },
+    "peer1.port.scannr.in": {
+      "url": "grpcs://localhost:10051",
+      "grpcOptions": {
+        "ssl-target-name-override": "peer1.port.scannr.in"
+      }
+    }
+  },
+  "certificateAuthorities": {
+    "ca-customs": {
+      "url": "https://localhost:7054",
+      "caName": "ca-customs",
+      "httpOptions": { "verify": false }
+    },
+    "ca-port": {
+      "url": "https://localhost:8054",
+      "caName": "ca-port",
+      "httpOptions": { "verify": false }
+    }
+  }
+}
